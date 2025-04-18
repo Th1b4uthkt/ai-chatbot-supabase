@@ -60,27 +60,47 @@ const eventTools: AllowedTools[] = [
 const allTools: AllowedTools[] = [...blocksTools, ...weatherTools, ...eventTools];
 
 async function getUser(request: Request) {
-  // Vérifier d'abord le jeton Bearer (mobile)
+  // Extraire l'en-tête d'autorisation 
   const authHeader = request.headers.get('Authorization');
+  
+  // Log détaillé pour le débogage
+  console.log('CHAT-API: Auth header:', authHeader ? 'Bearer [REDACTED]' : 'null');
+  console.log('CHAT-API: Headers:', Object.fromEntries([...request.headers.entries()]));
+  
+  // Vérifier d'abord le jeton Bearer (mobile)
   if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
+    console.log('CHAT-API: Bearer token detected, using mobile auth flow');
+    const token = authHeader.substring(7).trim();
+    console.log('CHAT-API: Token length:', token.length);
+    
+    // Utiliser validateToken au lieu de getUser directement
     const { data, error } = await validateToken(token);
-    if (!error && data.user) {
-      return data.user;
+    
+    if (error) {
+      console.error('CHAT-API: Token validation error:', error);
+      throw new Error(`Unauthorized: ${error.message}`);
     }
+    
+    if (!data.user) {
+      console.error('CHAT-API: No user found for token');
+      throw new Error('Unauthorized: Invalid token');
+    }
+    
+    console.log('CHAT-API: Mobile auth successful for user ID:', data.user.id);
+    return data.user;
   }
   
   // Sinon, utiliser l'authentification basée sur les cookies (web)
+  console.log('CHAT-API: No Bearer token, using web auth flow');
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user) {
+    console.error('CHAT-API: Web auth error:', error?.message || 'No user found');
     throw new Error('Unauthorized');
   }
 
+  console.log('CHAT-API: Web auth successful for user ID:', user.id);
   return user;
 }
 
@@ -170,23 +190,53 @@ export async function POST(request: Request) {
       const title = await generateTitleFromUserMessage({
         message: userMessage,
       });
-      await saveChat({ id, userId: user.id, title });
+      
+      console.log('DB-INSERT: Attempting to insert chat with user ID:', user.id);
+      console.log('DB-INSERT: Insert data prepared:', {
+        id: id,
+        user_id: user.id,
+        title: title
+      });
+      
+      try {
+        await saveChat({ id, userId: user.id, title });
+        console.log('DB-INSERT: Chat inserted successfully:', id);
+      } catch (error) {
+        console.error('DB-INSERT: Database error during chat insertion:', error);
+        throw error;
+      }
     } else if (chat.user_id !== user.id) {
+      console.error('DB-INSERT: Unauthorized access attempt, chat belongs to user:', chat.user_id);
       return new Response('Unauthorized', { status: 401 });
     }
 
-    await saveMessages({
-      chatId: id,
-      messages: [
-        {
-          id: generateUUID(),
-          chat_id: id,
-          role: userMessage.role as MessageRole,
-          content: formatMessageContent(userMessage),
-          created_at: new Date().toISOString(),
-        },
-      ],
+    console.log('DB-INSERT: Attempting to insert message for chat:', id);
+    
+    const messageData = {
+      id: generateUUID(),
+      chat_id: id,
+      role: userMessage.role as MessageRole,
+      content: formatMessageContent(userMessage),
+      created_at: new Date().toISOString(),
+    };
+    
+    console.log('DB-INSERT: Message data prepared:', {
+      id: messageData.id,
+      chat_id: messageData.chat_id,
+      role: messageData.role,
+      created_at: messageData.created_at
     });
+    
+    try {
+      await saveMessages({
+        chatId: id,
+        messages: [messageData],
+      });
+      console.log('DB-INSERT: Message inserted successfully');
+    } catch (error) {
+      console.error('DB-INSERT: Database error during message insertion:', error);
+      throw error;
+    }
 
     const streamingData = new StreamData();
     let cachedResponseMessages: (CoreAssistantMessage | CoreToolMessage)[] = [];
