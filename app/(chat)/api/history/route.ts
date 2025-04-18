@@ -1,12 +1,31 @@
+import { corsHeaders } from '@/app/api/cors-middleware';
 import { getSession } from '@/db/cached-queries';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, validateToken } from '@/lib/supabase/server';
 
-export async function GET() {
+async function getUser(request: Request) {
+  // Vérifier d'abord le jeton Bearer (mobile)
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const { data, error } = await validateToken(token);
+    if (!error && data.user) {
+      return data.user;
+    }
+  }
+
+  // Sinon, utiliser l'authentification basée sur les cookies (web)
+  return getSession();
+}
+
+export async function GET(request: Request) {
   const supabase = await createClient();
-  const user = await getSession();
+  const user = await getUser(request);
 
   if (!user) {
-    return Response.json('Unauthorized!', { status: 401 });
+    return new Response('Unauthorized', { 
+      status: 401,
+      headers: corsHeaders()
+    });
   }
 
   const { data: chats, error } = await supabase
@@ -17,5 +36,13 @@ export async function GET() {
 
   if (error) throw error;
 
-  return Response.json(chats);
+  return new Response(JSON.stringify(chats), {
+    headers: {
+      ...corsHeaders(),
+      'Content-Type': 'application/json',
+    }
+  });
 }
+
+// Ajouter le gestionnaire OPTIONS pour les requêtes préliminaires CORS
+export { OPTIONS } from '@/app/api/cors-middleware';

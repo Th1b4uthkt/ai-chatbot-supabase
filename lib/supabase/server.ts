@@ -27,3 +27,20 @@ export const createClient = async () => {
     }
   );
 };
+
+// Ajout de la fonction pour valider les jetons d'authentification mobiles
+export async function validateToken(token: string) {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      // Pas besoin de cookies pour la validation de token
+      cookies: {
+        getAll: () => [],
+        setAll: () => {},
+      },
+    }
+  );
+  
+  return supabase.auth.getUser(token);
+}

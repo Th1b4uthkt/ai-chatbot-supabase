@@ -1,12 +1,30 @@
 import { NextResponse } from 'next/server';
 
+import { corsHeaders } from '@/app/api/cors-middleware';
 import { upload } from '@/db/storage';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, validateToken } from '@/lib/supabase/server';
 
 import type { Database } from '@/lib/supabase/types';
 
 function sanitizeFileName(fileName: string): string {
   return fileName.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
+}
+
+async function getUser(request: Request) {
+  // Vérifier d'abord le jeton Bearer (mobile)
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const { data, error } = await validateToken(token);
+    if (!error && data.user) {
+      return data.user;
+    }
+  }
+
+  // Sinon, utiliser l'authentification basée sur les cookies (web)
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  return user;
 }
 
 export async function POST(req: Request) {
@@ -23,32 +41,28 @@ export async function POST(req: Request) {
     });
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ error: 'No file provided' }, { 
+        status: 400,
+        headers: corsHeaders()
+      });
     }
 
     if (!chatId) {
-      return NextResponse.json(
-        { error: 'No chatId provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No chatId provided' }, { 
+        status: 400,
+        headers: corsHeaders()
+      });
     }
 
-    const supabase = await createClient();
-
-    // Log auth status
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    console.log('Auth status:', {
-      isAuthenticated: !!user,
-      userId: user?.id,
-      authError,
-    });
-
+    // Vérifier l'authentification avec support mobile
+    const user = await getUser(req);
+    
     if (!user) {
-      console.error('Authentication failed:', authError);
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.error('Authentication failed');
+      return NextResponse.json({ error: 'Unauthorized' }, { 
+        status: 401,
+        headers: corsHeaders()
+      });
     }
 
     try {
@@ -64,26 +78,24 @@ export async function POST(req: Request) {
       });
 
       // Ensure bucket exists
-      const { data: buckets, error: bucketError } =
-        await supabase.storage.listBuckets();
+      const supabase = await createClient();
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
       console.log('Storage buckets:', {
-        availableBuckets: buckets?.map((b) => ({
+        availableBuckets: buckets?.map((b: any) => ({
           id: b.id,
-          name: b.name,
           public: b.public,
         })),
         error: bucketError,
       });
 
       // Create bucket if it doesn't exist
-      if (!buckets?.some((b) => b.id === 'chat_attachments')) {
+      if (!buckets?.some((b: any) => b.id === 'chat_attachments')) {
         console.log('Creating bucket...');
         const { error: createError } = await supabase.storage.createBucket(
           'chat_attachments',
           {
             public: true,
-            fileSizeLimit: 52428800,
-            allowedMimeTypes: ['image/*', 'application/pdf'],
+            fileSizeLimit: 1024 * 1024 * 5, // 5MB
           }
         );
         if (createError) {
@@ -116,7 +128,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
           url: existingFile.url,
           path: filePath.join('/'),
-        });
+        }, { headers: corsHeaders() });
       }
 
       // Insert new file record
@@ -145,10 +157,23 @@ export async function POST(req: Request) {
 
       console.log('File record created successfully');
 
-      return NextResponse.json({
-        url: publicUrl,
-        path: filePath.join('/'),
-      });
+      // Log RLS details if needed
+      const { data: policies } = await supabase
+        .from('postgres_policies')
+        .select('*')
+        .eq('table', 'storage.objects');
+      console.log('Current storage policies:', policies);
+
+      return NextResponse.json(
+        {
+          url: publicUrl,
+          path: filePath.join('/'),
+          name: file.name,
+          size: file.size,
+          chatId,
+        },
+        { headers: corsHeaders() }
+      );
     } catch (uploadError: any) {
       console.error('Upload error details:', {
         error: uploadError,
@@ -162,11 +187,6 @@ export async function POST(req: Request) {
       if (uploadError.message?.includes('row-level security')) {
         // Log RLS details
         console.error('RLS policy violation. Current user:', user);
-        const { data: policies } = await supabase
-          .from('postgres_policies')
-          .select('*')
-          .eq('table', 'storage.objects');
-        console.log('Current storage policies:', policies);
       }
 
       return NextResponse.json(
@@ -174,7 +194,7 @@ export async function POST(req: Request) {
           error: 'File upload failed',
           details: uploadError.message,
         },
-        { status: 500 }
+        { status: 500, headers: corsHeaders() }
       );
     }
   } catch (error: any) {
@@ -185,7 +205,10 @@ export async function POST(req: Request) {
     });
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
-      { status: 500 }
+      { status: 500, headers: corsHeaders() }
     );
   }
 }
+
+// Ajouter le gestionnaire OPTIONS pour les requêtes préliminaires CORS
+export { OPTIONS } from '@/app/api/cors-middleware';
