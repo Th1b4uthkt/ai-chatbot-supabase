@@ -14,6 +14,7 @@ import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
+import { EventsToolRenderer } from '../events/EventsToolRenderer';
 
 export const PreviewMessage = ({
   chatId,
@@ -65,6 +66,8 @@ export const PreviewMessage = ({
                     <div key={toolCallId}>
                       {toolName === 'getWeather' ? (
                         <Weather weatherAtLocation={result} />
+                      ) : toolName === 'getEvents' ? (
+                        <EventsToolRenderer result={result} />
                       ) : toolName === 'createDocument' ? (
                         <DocumentToolResult
                           type="create"
@@ -96,11 +99,24 @@ export const PreviewMessage = ({
                     <div
                       key={toolCallId}
                       className={cx({
-                        skeleton: ['getWeather'].includes(toolName),
+                        skeleton: ['getWeather', 'getEvents'].includes(toolName),
                       })}
                     >
                       {toolName === 'getWeather' ? (
                         <Weather />
+                      ) : toolName === 'getEvents' ? (
+                        <div className="p-4 rounded-lg bg-gray-100 animate-pulse">
+                          <div className="h-6 w-32 bg-gray-200 rounded mb-2"></div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="bg-white p-4 rounded-lg shadow">
+                                <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                                <div className="h-3 w-full bg-gray-100 rounded mb-1"></div>
+                                <div className="h-3 w-16 bg-gray-100 rounded"></div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       ) : toolName === 'createDocument' ? (
                         <DocumentToolCall type="create" args={args} />
                       ) : toolName === 'updateDocument' ? (

@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
       {
         hostname: 'avatar.vercel.sh',
       },
+      {
+        hostname: 'phanganlife.com',
+      },
+      {
+        hostname: 'phangan.events',
+      },
     ],
   },
   webpack: (config) => {
