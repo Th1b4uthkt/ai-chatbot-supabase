@@ -41,10 +41,8 @@ export async function getUserByIdQuery(client: Client, id: string) {
     .single();
 
   if (error) {
-    throw {
-      message: error.message,
-      status: error?.code ? 400 : 500,
-    } as AuthError;
+    const status = error.code === 'PGRST116' ? 404 : 500;
+    throw new Error(`Error fetching user by ID (${status}): ${error.message}`);
   }
 
   return user;
@@ -351,10 +349,8 @@ export async function getUserProfileQuery(client: Client, userId: string) {
     .single();
 
   if (error) {
-    throw {
-      message: error.message,
-      status: error?.code ? 400 : 500,
-    } as AuthError;
+    const status = error.code === 'PGRST116' ? 404 : 500;
+    throw new Error(`Error fetching user profile (${status}): ${error.message}`);
   }
 
   return profile;
@@ -368,10 +364,10 @@ export async function isUserAdminQuery(client: Client, userId: string) {
     .single();
 
   if (error) {
-    throw {
-      message: error.message,
-      status: error?.code ? 400 : 500,
-    } as AuthError;
+    if (error.code === 'PGRST116') {
+      return false;
+    }
+    throw new Error(`Error checking admin status (500): ${error.message}`);
   }
 
   return profile?.is_admin || false;

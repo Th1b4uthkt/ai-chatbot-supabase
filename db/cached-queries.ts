@@ -3,7 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient as createServerSupabaseClient } from '@/lib/supabase/server';
 import {
   getChatByIdQuery,
   getChatsByUserIdQuery,
@@ -34,7 +34,7 @@ import {
 } from '@/db/queries';
 import { TablesInsert, TablesUpdate } from '@/lib/supabase/types';
 
-const getSupabase = cache(() => createClient());
+const getSupabase = cache(() => createServerSupabaseClient());
 
 export const getSession = async () => {
   const supabase = await getSupabase();
@@ -235,66 +235,66 @@ export const isUserAdmin = async (userId: string) => {
 };
 
 export const getEvents = async () => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getEventsQuery(client);
 };
 
 export const getEventById = async (id: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getEventByIdQuery(client, id);
 };
 
 export const createEvent = async (eventData: TablesInsert<'events'>) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return createEventQuery(client, eventData);
 };
 
 export const updateEvent = async (id: string, eventData: TablesUpdate<'events'>) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return updateEventQuery(client, id, eventData);
 };
 
 export const deleteEvent = async (id: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return deleteEventQuery(client, id);
 };
 
 export const getPartners = async () => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getPartnersQuery(client);
 };
 
 export const getPartnerById = async (id: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getPartnerByIdQuery(client, id);
 };
 
 export const getPartnersByCategory = async (category: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getPartnersByCategoryQuery(client, category);
 };
 
 export const createPartner = async (partnerData: TablesInsert<'partners'>) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return createPartnerQuery(client, partnerData);
 };
 
 export const updatePartner = async (id: string, partnerData: TablesUpdate<'partners'>) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return updatePartnerQuery(client, id, partnerData);
 };
 
 export const deletePartner = async (id: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return deletePartnerQuery(client, id);
 };
 
 export const getGuides = async () => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getGuidesQuery(client);
 };
 
 export const getGuideById = async (id: string) => {
-  const client = await createClient();
+  const client = await getSupabase();
   return getGuideByIdQuery(client, id);
 };
