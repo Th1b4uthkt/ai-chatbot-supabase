@@ -90,6 +90,12 @@ export interface GuideType extends BaseGuideType {
   
   // Avis et témoignages
   testimonials?: Testimonial[];
+  
+  // Champs ajoutés pour compatibilité formulaire (peuvent être dans des extensions)
+  difficulty?: string; // Ou: "easy" | "moderate" | "difficult" | "expert";
+  duration?: string;
+  equipment?: string[];
+  facilities?: string[];
 }
 
 // TYPES MODULAIRES RÉUTILISABLES

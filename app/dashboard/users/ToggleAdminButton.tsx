@@ -1,6 +1,9 @@
 "use client";
 
+import { Loader2, UserCheck, UserX } from 'lucide-react';
 import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 
 import { toggleUserAdminStatus } from './actions';
 
@@ -21,7 +24,7 @@ export function ToggleAdminButton({
       if (result.success) {
         setCurrentStatus(!currentStatus);
       } else {
-        // Consider using a more robust notification system than alert
+        // Consider using a toast notification library here instead of alert
         console.error('Error updating status:', result.error);
         alert(`Error: ${result.error}`);
       }
@@ -33,17 +36,21 @@ export function ToggleAdminButton({
     }
   };
   
+  const Icon = currentStatus ? UserX : UserCheck;
+
   return (
-    <button
+    <Button
+      variant={currentStatus ? 'destructive' : 'outline'}
+      size="sm"
       onClick={handleToggle}
       disabled={isLoading}
-      className={`px-3 py-1 rounded text-white ${
-        currentStatus 
-          ? 'bg-red-500 hover:bg-red-600' 
-          : 'bg-blue-500 hover:bg-blue-600'
-      } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
+      {isLoading ? (
+        <Loader2 className="mr-2 size-4 animate-spin" />
+      ) : (
+        <Icon className="mr-2 size-4" />
+      )}
       {isLoading ? 'Updating...' : currentStatus ? 'Remove Admin' : 'Make Admin'}
-    </button>
+    </Button>
   );
 } 

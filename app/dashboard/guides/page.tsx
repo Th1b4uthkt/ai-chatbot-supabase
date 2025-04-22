@@ -1,6 +1,7 @@
 import { Edit, Eye, Plus, Search, Trash2 } from "lucide-react"
 import Link from "next/link"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -44,8 +45,16 @@ export default async function GuidesPage() {
         <TableCell className="font-medium">{guide.title}</TableCell>
         <TableCell>{guide.category}</TableCell>
         <TableCell>{guide.location || 'N/A'}</TableCell>
-        <TableCell className="text-xs">
-          {Array.isArray(guide.tags) ? guide.tags.join(', ') : 'N/A'}
+        <TableCell>
+          <div className="flex flex-wrap gap-1">
+            {Array.isArray(guide.tags) && guide.tags.length > 0 ? (
+              guide.tags.map((tag: string, index: number) => (
+                <Badge key={index} variant="secondary">{tag}</Badge>
+              ))
+            ) : (
+              <span className="text-xs text-muted-foreground">N/A</span>
+            )}
+          </div>
         </TableCell>
         <TableCell>{formatDate(guide.lastUpdatedAt || guide.created_at)}</TableCell>
         <TableCell className="text-right space-x-2">
@@ -75,11 +84,11 @@ export default async function GuidesPage() {
   );
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Guides</h2>
+    <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Guides</h1>
         <Link href="/dashboard/guides/new">
-          <Button className="hidden md:flex">
+          <Button className="hidden md:flex items-center">
             <Plus className="mr-2 size-4" />
             Create Guide
           </Button>
@@ -88,45 +97,43 @@ export default async function GuidesPage() {
           </Button>
         </Link>
       </div>
-      <div>
-        <Card>
-          <CardHeader className="flex flex-row items-center">
-            <div className="grid gap-2">
-              <CardTitle>Guides List</CardTitle>
-              <CardDescription>
-                Manage your guides, edit or delete them.
-              </CardDescription>
+      <Card className="shadow-sm border-border/40">
+        <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+          <div className="grid gap-1">
+            <CardTitle>Guides List</CardTitle>
+            <CardDescription>
+              Manage your guides, edit or delete them.
+            </CardDescription>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search for a guide..."
+                className="pl-8 w-full md:w-[300px]"
+              />
             </div>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search for a guide..."
-                  className="pl-8 w-full md:w-[300px]"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Updated At</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tableBodyContent}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Tags</TableHead>
+                <TableHead>Updated At</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tableBodyContent}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }

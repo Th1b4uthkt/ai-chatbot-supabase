@@ -1,19 +1,45 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import {
+  ArrowLeft,
+  CalendarIcon,
+  DollarSignIcon,
+  GlobeIcon,
+  ImageIcon,
+  InfoIcon,
+  LinkIcon,
+  ListIcon,
+  Loader2,
+  MapPinIcon,
+  PhoneIcon,
+  TagIcon,
+  TicketIcon,
+  UsersIcon,
+  BuildingIcon,
+  SparklesIcon,
+  UtensilsIcon,
+  Accessibility,
+  WifiIcon,
+  DogIcon,
+  BabyIcon,
+  ContactIcon,
+  RecycleIcon,
+  ClockIcon,
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { useForm, type SubmitHandler } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
@@ -60,7 +86,6 @@ export default function NewEventPage() {
   const router = useRouter()
   const { toast } = useToast()
 
-  // Initialiser le formulaire avec des valeurs par défaut
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -171,99 +196,109 @@ export default function NewEventPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-8">
       <div className="flex items-center gap-4 mb-8">
-        <Button asChild variant="ghost" size="icon">
+        <Button asChild variant="outline" size="icon" className="size-9 rounded-full shadow-sm">
           <Link href="/dashboard/events">
-            <ArrowLeft className="size-5" />
+            <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Create a New Event</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">Create New Event</h1>
+          <p className="text-muted-foreground">Fill in the details below to add a new event.</p>
+        </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-          <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="organizer">Organizer</TabsTrigger>
-              <TabsTrigger value="facilities">Facilities</TabsTrigger>
-            </TabsList>
+        <Card className="border-border/40 shadow-md rounded-xl overflow-hidden">
+          <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-0">
+            <Tabs defaultValue="general" className="w-full">
+              <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto rounded-none px-4 border-b-0">
+                  <TabsTrigger value="general" className="py-3 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                    <InfoIcon className="size-4 mr-2 text-primary/70" />
+                    General
+                  </TabsTrigger>
+                  <TabsTrigger value="details" className="py-3 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                    <ListIcon className="size-4 mr-2 text-primary/70" />
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger value="organizer" className="py-3 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                    <ContactIcon className="size-4 mr-2 text-primary/70" />
+                    Organizer
+                  </TabsTrigger>
+                  <TabsTrigger value="facilities" className="py-3 data-[state=active]:bg-background data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+                    <BuildingIcon className="size-4 mr-2 text-primary/70" />
+                    Facilities
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            <TabsContent value="general" className="pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Information</CardTitle>
-                  <CardDescription>Essential information about the event</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Event Title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+              <TabsContent value="general" className="mt-0 pt-0">
+                <CardContent className="space-y-6 p-4 md:p-6">
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel className="flex items-center text-sm font-medium"><InfoIcon className="size-4 mr-2 text-primary"/>Title</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
+                            <Input placeholder="Amazing Phangan Party" {...field} className="border-input/50 focus:border-primary/50 shadow-sm" />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="party">Party</SelectItem>
-                            <SelectItem value="festival">Festival</SelectItem>
-                            <SelectItem value="market">Market</SelectItem>
-                            <SelectItem value="workshop">Workshop</SelectItem>
-                            <SelectItem value="culture">Cultural</SelectItem>
-                            <SelectItem value="sport">Sport</SelectItem>
-                            <SelectItem value="wellness">Wellness</SelectItem>
-                            <SelectItem value="kids">Kids</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Event type (e.g., party, festival, market, etc.)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="image"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Image (URL)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center text-sm font-medium"><ListIcon className="size-4 mr-2 text-primary"/>Category</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="border-input/50 focus:border-primary/50 shadow-sm">
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="party">Party</SelectItem>
+                              <SelectItem value="festival">Festival</SelectItem>
+                              <SelectItem value="market">Market</SelectItem>
+                              <SelectItem value="workshop">Workshop</SelectItem>
+                              <SelectItem value="culture">Cultural</SelectItem>
+                              <SelectItem value="sport">Sport</SelectItem>
+                              <SelectItem value="wellness">Wellness</SelectItem>
+                              <SelectItem value="kids">Kids</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="image"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><ImageIcon className="size-4 mr-2"/>Image URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="time"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Date and Time</FormLabel>
+                          <FormLabel className="flex items-center"><CalendarIcon className="size-4 mr-2"/>Date & Time</FormLabel>
                           <FormControl>
                             <Input type="datetime-local" {...field} />
                           </FormControl>
@@ -277,104 +312,85 @@ export default function NewEventPage() {
                       name="location"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Location</FormLabel>
+                          <FormLabel className="flex items-center"><MapPinIcon className="size-4 mr-2"/>Location</FormLabel>
                           <FormControl>
-                            <Input placeholder="Event Location" {...field} />
+                            <Input placeholder="Secret Beach" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center"><DollarSignIcon className="size-4 mr-2"/>Price (THB)</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="0" placeholder="0 (Free)" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="latitude"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Latitude</FormLabel>
+                            <FormControl><Input type="number" step="any" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="longitude"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Longitude</FormLabel>
+                            <FormControl><Input type="number" step="any" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="0" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel className="flex items-center"><InfoIcon className="size-4 mr-2"/>Description</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Event Description" className="min-h-32" {...field} />
+                          <Textarea placeholder="Describe the event..." className="min-h-40" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="latitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Latitude</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.000001" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="longitude"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Longitude</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.000001" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="details" className="pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Additional Details</CardTitle>
-                  <CardDescription>Additional information about the event</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="duration"
-                    render={({ field }) => (
+              <TabsContent value="details" className="mt-0 pt-0">
+                <CardContent className="space-y-6 p-4 md:p-6">
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                    <FormField control={form.control} name="duration" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Duration</FormLabel>
+                        <FormLabel className="flex items-center"><ClockIcon className="size-4 mr-2"/>Duration</FormLabel>
                         <FormControl>
                           <Input placeholder="2 hours" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="recurrencePattern"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="recurrencePattern" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Recurrence</FormLabel>
+                        <FormLabel className="flex items-center"><RecycleIcon className="size-4 mr-2"/>Recurrence</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -391,112 +407,76 @@ export default function NewEventPage() {
                         </Select>
                         <FormMessage />
                       </FormItem>
+                    )} />
+                    {form.watch("recurrencePattern") === "custom" && (
+                      <FormField
+                        control={form.control}
+                        name="recurrenceCustomPattern"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Custom Recurrence Pattern</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Every first Monday of the month" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     )}
-                  />
-
-                  {form.watch("recurrencePattern") === "custom" && (
-                    <FormField
-                      control={form.control}
-                      name="recurrenceCustomPattern"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Custom Recurrence Pattern</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Every first Monday of the month" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tags</FormLabel>
+                    <FormField control={form.control} name="tags" render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel className="flex items-center"><TagIcon className="size-4 mr-2"/>Tags</FormLabel>
                         <FormControl>
                           <Input placeholder="music, live, rock" {...field} />
                         </FormControl>
                         <FormDescription>Separate tags with commas</FormDescription>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="capacity"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="capacity" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Capacity</FormLabel>
+                        <FormLabel className="flex items-center"><UsersIcon className="size-4 mr-2"/>Capacity</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="100" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 0)} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ticketsUrl"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="ticketsUrl" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ticket URL</FormLabel>
+                        <FormLabel className="flex items-center"><LinkIcon className="size-4 mr-2"/>Ticket URL</FormLabel>
                         <FormControl>
                           <Input placeholder="https://example.com/tickets" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="ticketsAvailableCount"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="ticketsAvailableCount" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Number of tickets available</FormLabel>
+                        <FormLabel className="flex items-center"><TicketIcon className="size-4 mr-2"/>Tickets Available</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="50" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 0)} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
+                    )} />
+                  </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="organizer" className="pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Organizer</CardTitle>
-                  <CardDescription>
-                    Information about the event organizer
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="organizerName"
-                    render={({ field }) => (
+              <TabsContent value="organizer" className="mt-0 pt-0">
+                <CardContent className="space-y-6 p-4 md:p-6">
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+                    <FormField control={form.control} name="organizerName" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Organizer Name</FormLabel>
+                        <FormLabel className="flex items-center"><ContactIcon className="size-4 mr-2"/>Organizer Name</FormLabel>
                         <FormControl>
                           <Input placeholder="Organizer Name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="organizerEmail"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="organizerEmail" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
@@ -504,210 +484,131 @@ export default function NewEventPage() {
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="organizerPhone"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="organizerPhone" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone</FormLabel>
+                        <FormLabel className="flex items-center"><PhoneIcon className="size-4 mr-2"/>Phone</FormLabel>
                         <FormControl>
                           <Input placeholder="+33 1 23 45 67 89" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="organizerWebsite"
-                    render={({ field }) => (
+                    )} />
+                    <FormField control={form.control} name="organizerWebsite" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Website</FormLabel>
+                        <FormLabel className="flex items-center"><GlobeIcon className="size-4 mr-2"/>Website</FormLabel>
                         <FormControl>
                           <Input placeholder="https://example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
+                    )} />
+                  </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="facilities" className="pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Available Facilities</CardTitle>
-                  <CardDescription>Services and amenities available at the event venue</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="parking"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+              <TabsContent value="facilities" className="mt-0 pt-0">
+                <CardContent className="p-4 md:p-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="parking" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="parking" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Parking</FormLabel>
+                          <FormLabel htmlFor="parking" className="flex items-center cursor-pointer"><BuildingIcon className="size-4 mr-2 text-primary"/><span className="font-medium">Parking</span></FormLabel>
                           <FormDescription>Parking available on site</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="atm"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="atm" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="atm" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>ATM</FormLabel>
+                          <FormLabel htmlFor="atm" className="flex items-center cursor-pointer"><SparklesIcon className="size-4 mr-2 text-primary"/><span className="font-medium">ATM</span></FormLabel>
                           <FormDescription>ATM on site</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="foodAvailable"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="foodAvailable" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="food" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Food</FormLabel>
+                          <FormLabel htmlFor="food" className="flex items-center cursor-pointer"><UtensilsIcon className="size-4 mr-2 text-primary"/><span className="font-medium">Food</span></FormLabel>
                           <FormDescription>Food available on site</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="toilets"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="toilets" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="toilets" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Restrooms</FormLabel>
+                          <FormLabel htmlFor="toilets" className="flex items-center cursor-pointer"><BuildingIcon className="size-4 mr-2 text-primary"/><span className="font-medium">Restrooms</span></FormLabel>
                           <FormDescription>Restrooms available on site</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="wheelchair"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="wheelchair" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="wheelchair" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Wheelchair Access</FormLabel>
+                          <FormLabel htmlFor="wheelchair" className="flex items-center cursor-pointer"><Accessibility className="size-4 mr-2 text-primary"/><span className="font-medium">Wheelchair Access</span></FormLabel>
                           <FormDescription>Accessible for people with reduced mobility</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="wifi"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="wifi" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="wifi" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>WiFi</FormLabel>
+                          <FormLabel htmlFor="wifi" className="flex items-center cursor-pointer"><WifiIcon className="size-4 mr-2 text-primary"/><span className="font-medium">WiFi</span></FormLabel>
                           <FormDescription>WiFi available on site</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="petFriendly"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="petFriendly" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="pets" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Pets Allowed</FormLabel>
+                          <FormLabel htmlFor="pets" className="flex items-center cursor-pointer"><DogIcon className="size-4 mr-2 text-primary"/><span className="font-medium">Pets Allowed</span></FormLabel>
                           <FormDescription>Pets are allowed at the venue</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
 
-                  <FormField
-                    control={form.control}
-                    name="childFriendly"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
+                    <FormField control={form.control} name="childFriendly" render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-muted/30 hover:bg-muted/50 transition-colors hover:shadow-sm">
+                        <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} id="child" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"/></FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Child Friendly</FormLabel>
+                          <FormLabel htmlFor="child" className="flex items-center cursor-pointer"><BabyIcon className="size-4 mr-2 text-primary"/><span className="font-medium">Child Friendly</span></FormLabel>
                           <FormDescription>Event suitable for children</FormDescription>
                         </div>
                       </FormItem>
-                    )}
-                  />
+                    )} />
+                  </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Create Event
-            </Button>
-          </div>
-        </form>
+            <CardFooter className="border-t px-6 py-4 bg-muted/20">
+              <div className="flex justify-end w-full">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting} 
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 text-white font-medium shadow-md transition-all hover:shadow-lg"
+                >
+                  {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+                  Create Event
+                </Button>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
       </Form>
     </div>
   )

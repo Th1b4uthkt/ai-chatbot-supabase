@@ -24,73 +24,79 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 217 100% 45%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 213 100% 96%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* --- Phangan Pirate - Light Theme (Île ensoleillée) --- */
+    --background: 48 33% 96%; /* Sable très clair */
+    --foreground: 210 10% 23%; /* Gris anthracite */
+    --card: 0 0% 100%; /* Blanc */
+    --card-foreground: 210 10% 23%; /* Gris anthracite */
+    --popover: 0 0% 100%; /* Blanc */
+    --popover-foreground: 210 10% 23%; /* Gris anthracite */
+    --primary: 215 60% 55%; /* Bleu Océan */
+    --primary-foreground: 210 40% 98%; /* Presque blanc */
+    --secondary: 215 25% 90%; /* Bleu très clair/Gris */
+    --secondary-foreground: 210 10% 23%; /* Gris anthracite */
+    --muted: 215 25% 94%; /* Gris très clair */
+    --muted-foreground: 210 8% 45%; /* Gris moyen */
+    --accent: 45 80% 60%; /* Or */
+    --accent-foreground: 30 10% 20%; /* Brun foncé pour contraste sur l'or */
+    --destructive: 0 72% 51%; /* Rouge pirate */
+    --destructive-foreground: 0 0% 98%; /* Presque blanc */
+    --border: 215 25% 88%; /* Gris clair/Bleu pâle */
+    --input: 215 25% 88%; /* Gris clair/Bleu pâle */
+    --ring: 215 60% 55%; /* Bleu Océan (pour focus) */
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 5.9% 94%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --chart-1: 215 60% 55%; /* Bleu Océan */
+    --chart-2: 45 80% 60%; /* Or */
+    --chart-3: 190 50% 60%; /* Cyan/Turquoise */
+    --chart-4: 0 72% 51%; /* Rouge pirate */
+    --chart-5: 20 70% 70%; /* Corail */
+    /* Sidebar Light */
+    --sidebar-background: 215 25% 94%; /* Gris très clair */
+    --sidebar-foreground: 210 10% 23%; /* Gris anthracite */
+    --sidebar-primary: 215 60% 55%; /* Bleu Océan */
+    --sidebar-primary-foreground: 210 40% 98%; /* Presque blanc */
+    --sidebar-accent: 0 0% 100%; /* Blanc */
+    --sidebar-accent-foreground: 210 10% 23%; /* Gris anthracite */
+    --sidebar-border: 215 25% 88%; /* Gris clair/Bleu pâle */
+    --sidebar-ring: 215 60% 55%; /* Bleu Océan */
   }
+
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 208.69 100% 24.18%;
-    --primary-foreground: 207 100% 96%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* --- Phangan Pirate - Dark Theme (Nuit en mer) --- */
+    --background: 220 30% 12%; /* Bleu nuit très sombre */
+    --foreground: 210 40% 96%; /* Gris très clair */
+    --card: 220 30% 18%; /* Bleu nuit un peu plus clair */
+    --card-foreground: 210 40% 96%; /* Gris très clair */
+    --popover: 220 30% 15%; /* Bleu nuit (plus sombre que card) */
+    --popover-foreground: 210 40% 96%; /* Gris très clair */
+    --primary: 210 70% 65%; /* Bleu Océan vif */
+    --primary-foreground: 220 30% 15%; /* Bleu nuit (contraste sur bleu vif) */
+    --secondary: 220 20% 25%; /* Gris bleu sombre */
+    --secondary-foreground: 210 40% 96%; /* Gris très clair */
+    --muted: 220 20% 22%; /* Gris bleu (plus sombre que secondary) */
+    --muted-foreground: 210 20% 65%; /* Gris clair moyen */
+    --accent: 45 85% 65%; /* Or vif */
+    --accent-foreground: 40 20% 15%; /* Brun très foncé (contraste sur or) */
+    --destructive: 0 65% 55%; /* Rouge pirate vif */
+    --destructive-foreground: 0 0% 98%; /* Presque blanc */
+    --border: 220 30% 25%; /* Gris bleu (légèrement plus clair que card) */
+    --input: 220 30% 25%; /* Gris bleu */
+    --ring: 45 85% 65%; /* Or vif (pour focus) */
+    /* Chart Dark */
+    --chart-1: 210 70% 65%; /* Bleu Océan vif */
+    --chart-2: 45 85% 65%; /* Or vif */
+    --chart-3: 190 60% 70%; /* Cyan/Turquoise vif */
+    --chart-4: 0 65% 55%; /* Rouge pirate vif */
+    --chart-5: 20 80% 75%; /* Corail vif */
+    /* Sidebar Dark */
+    --sidebar-background: 220 30% 15%; /* Bleu nuit (plus sombre que card) */
+    --sidebar-foreground: 210 40% 96%; /* Gris très clair */
+    --sidebar-primary: 210 70% 65%; /* Bleu Océan vif */
+    --sidebar-primary-foreground: 220 30% 15%; /* Bleu nuit */
+    --sidebar-accent: 220 30% 25%; /* Gris bleu */
+    --sidebar-accent-foreground: 210 40% 96%; /* Gris très clair */
+    --sidebar-border: 220 30% 25%; /* Gris bleu */
+    --sidebar-ring: 45 85% 65%; /* Or vif */
   }
 }
 
@@ -101,6 +107,8 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Amélioration de la transition des couleurs */
+    @apply transition-colors duration-300;
   }
 
   @font-face {

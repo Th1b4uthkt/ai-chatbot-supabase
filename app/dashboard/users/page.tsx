@@ -1,4 +1,4 @@
-import { PlusCircle, User as UserIcon } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
+import { formatDate } from '@/lib/utils';
 
 import { toggleUserAdminStatus } from './actions';
 import { ToggleAdminButton } from './ToggleAdminButton';
@@ -29,70 +30,72 @@ export default async function UsersPage() {
   
   if (error) {
     console.error('Error fetching users:', error.message);
-    return <div>Error loading users</div>;
+    return <div className="p-4 text-destructive">Error loading users. Please try again later.</div>;
+  }
+  
+  if (!users) {
+    return <div className="p-4">No users found.</div>;
   }
   
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
-      
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Admin Status
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+    <Card>
+      <CardHeader>
+        <CardTitle>User Management</CardTitle>
+        <CardDescription>Manage user accounts and permissions.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[80px]">Avatar</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Joined Date</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name || user.username || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{user.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_admin ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+              <TableRow key={user.id}>
+                <TableCell>
+                  <Avatar className="size-9">
+                    <AvatarImage alt={user.name || user.username || 'User Avatar'} />
+                    <AvatarFallback>
+                      {user.name ? user.name.substring(0, 2).toUpperCase() : user.username ? user.username.substring(0, 2).toUpperCase() : <UserIcon className="size-4" />}
+                    </AvatarFallback>
+                  </Avatar>
+                </TableCell>
+                <TableCell className="font-medium">{user.name || 'N/A'}</TableCell>
+                <TableCell className="text-muted-foreground">{user.username || 'N/A'}</TableCell>
+                <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                <TableCell>
+                  <Badge variant={user.is_admin ? 'default' : 'secondary'}>
                     {user.is_admin ? 'Admin' : 'User'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {user.created_at ? formatDate(user.created_at) : 'N/A'}
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-2">
                     <ToggleAdminButton
                       userId={user.id}
                       isAdmin={user.is_admin || false}
                     />
-                    <Link 
-                      href={`/dashboard/users/${user.id}`}
-                      className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      View Profile
-                    </Link>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/dashboard/users/${user.id}`}>
+                        View Profile
+                      </Link>
+                    </Button>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 } 
