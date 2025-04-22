@@ -27,20 +27,20 @@ type PartnerRow = Tables<'partners'>;
 // Note: This is a simplified schema - in a real app you'd want to handle 
 // all the different partner types and their specific fields
 const partnerSchema = z.object({
-  name: z.string().min(3, { message: "Le nom doit contenir au moins 3 caractères" }),
-  category: z.string().min(1, { message: "Veuillez sélectionner une catégorie" }),
-  image: z.string().url({ message: "Veuillez entrer une URL d'image valide" }),
-  short_description: z.string().min(10, { message: "La description courte doit contenir au moins 10 caractères" }),
-  location: z.string().min(3, { message: "Le lieu doit contenir au moins 3 caractères" }),
-  price_range: z.string().min(1, { message: "Veuillez sélectionner une gamme de prix" }),
-  open_hours: z.string().min(3, { message: "Veuillez indiquer les heures d'ouverture" }),
-  contact: z.string().min(3, { message: "Veuillez indiquer un contact" }),
+  name: z.string().min(3, { message: "Name must contain at least 3 characters" }),
+  category: z.string().min(1, { message: "Please select a category" }),
+  image: z.string().url({ message: "Please enter a valid image URL" }),
+  short_description: z.string().min(10, { message: "Short description must contain at least 10 characters" }),
+  location: z.string().min(3, { message: "Location must contain at least 3 characters" }),
+  price_range: z.string().min(1, { message: "Please select a price range" }),
+  open_hours: z.string().min(3, { message: "Please indicate opening hours" }),
+  contact: z.string().min(3, { message: "Please indicate a contact" }),
   latitude: z.number(),
   longitude: z.number(),
   is_sponsored: z.boolean().optional(),
-  long_description: z.string().min(20, { message: "La description longue doit contenir au moins 20 caractères" }),
-  email: z.string().email({ message: "Veuillez entrer une adresse email valide" }).optional().or(z.literal('')),
-  website: z.string().url({ message: "Veuillez entrer une URL valide" }).optional().or(z.literal('')),
+  long_description: z.string().min(20, { message: "Long description must contain at least 20 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal('')),
+  website: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal(''))
 });
 
 type FormValues = z.infer<typeof partnerSchema>;
@@ -97,8 +97,8 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
       
       if (result.success) {
         toast({
-          title: "Succès",
-          description: "Partenaire mis à jour avec succès",
+          title: "Success",
+          description: "Partner updated successfully",
         })
         router.push(`/dashboard/partners`)
       } else {
@@ -107,8 +107,8 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
     } catch (error) {
       console.error("Error updating partner:", error)
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible de mettre à jour le partenaire. Veuillez réessayer.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Could not update partner. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -118,11 +118,11 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
 
   // Partner category options based on your partner.ts file
   const categoryOptions = [
-    { value: "location-scooter", label: "Location de scooter" },
-    { value: "location-voiture", label: "Location de voiture" },
-    { value: "location-bateau", label: "Location de bateau" },
-    { value: "location-velo", label: "Location de vélo" },
-    { value: "hebergement-appartement", label: "Appartement" },
+    { value: "location-scooter", label: "Scooter Rental" },
+    { value: "location-voiture", label: "Car Rental" },
+    { value: "location-bateau", label: "Boat Rental" },
+    { value: "location-velo", label: "Bike Rental" },
+    { value: "hebergement-appartement", label: "Apartment" },
     { value: "hebergement-bungalow", label: "Bungalow" },
     { value: "hebergement-villa", label: "Villa" },
     { value: "hebergement-guesthouse", label: "Guesthouse" },
@@ -138,16 +138,16 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general">Général</TabsTrigger>
-            <TabsTrigger value="details">Détails</TabsTrigger>
-            <TabsTrigger value="location">Localisation</TabsTrigger>
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="location">Location</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Informations générales</CardTitle>
-                <CardDescription>Informations essentielles sur le partenaire</CardDescription>
+                <CardTitle>General Information</CardTitle>
+                <CardDescription>Essential information about the partner</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -155,9 +155,9 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du partenaire" {...field} />
+                        <Input placeholder="Partner Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -168,11 +168,11 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Catégorie</FormLabel>
+                      <FormLabel>Category</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une catégorie" />
+                            <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -205,9 +205,9 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="short_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description courte</FormLabel>
+                      <FormLabel>Short Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Description courte du partenaire" {...field} />
+                        <Textarea placeholder="Short description of the partner" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -218,18 +218,18 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="price_range"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Gamme de prix</FormLabel>
+                      <FormLabel>Price Range</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une gamme de prix" />
+                            <SelectValue placeholder="Select a price range" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="$">$ (Économique)</SelectItem>
-                          <SelectItem value="$$">$$ (Moyen)</SelectItem>
-                          <SelectItem value="$$$">$$$ (Haut de gamme)</SelectItem>
-                          <SelectItem value="$$$$">$$$$ (Luxe)</SelectItem>
+                          <SelectItem value="$">$ (Budget)</SelectItem>
+                          <SelectItem value="$$">$$ (Mid-range)</SelectItem>
+                          <SelectItem value="$$$">$$$ (High-end)</SelectItem>
+                          <SelectItem value="$$$$">$$$$ (Luxury)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -243,8 +243,8 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
           <TabsContent value="details" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Détails</CardTitle>
-                <CardDescription>Informations détaillées sur le partenaire</CardDescription>
+                <CardTitle>Details</CardTitle>
+                <CardDescription>Detailed information about the partner</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -252,9 +252,9 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="long_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description longue</FormLabel>
+                      <FormLabel>Long Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Description complète du partenaire" className="min-h-32" {...field} />
+                        <Textarea placeholder="Full description of the partner" className="min-h-32" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -278,9 +278,9 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="open_hours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Heures d&apos;ouverture</FormLabel>
+                      <FormLabel>Opening Hours</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: 9:00 - 18:00" {...field} />
+                        <Input placeholder="Ex: 9:00 AM - 6:00 PM" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -304,11 +304,13 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="website"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site web</FormLabel>
+                      <FormLabel>URL du site web</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com" {...field} />
+                        <Input type="url" placeholder="https://example.com" {...field} />
                       </FormControl>
-                      <FormDescription>L&apos;URL du site web (optionnel).</FormDescription>
+                      <FormDescription>
+                        L&apos;URL complète du site web du partenaire.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -320,8 +322,8 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
           <TabsContent value="location" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Localisation</CardTitle>
-                <CardDescription>Informations sur l&apos;emplacement du partenaire</CardDescription>
+                <CardTitle>Location</CardTitle>
+                <CardDescription>Information about the partners location</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -329,7 +331,7 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Adresse</FormLabel>
+                      <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input placeholder="123 Beach Road, Thong Sala" {...field} />
                       </FormControl>
@@ -383,7 +385,7 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-            Mettre à jour le partenaire
+            Update Partner
           </Button>
         </div>
       </form>

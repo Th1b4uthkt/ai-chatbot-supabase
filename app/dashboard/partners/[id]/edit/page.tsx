@@ -24,9 +24,9 @@ export default async function PartnerEditPage(props: PartnerEditPageProps) {
   if (!partner) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
-        <p className="text-xl text-muted-foreground">Partenaire non trouvé.</p>
+        <p className="text-xl text-muted-foreground">Partner not found.</p>
         <Button asChild variant="outline">
-          <Link href="/dashboard/partners">Retour à la liste</Link>
+          <Link href="/dashboard/partners">Back to list</Link>
         </Button>
       </div>
     );
@@ -41,7 +41,7 @@ export default async function PartnerEditPage(props: PartnerEditPageProps) {
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Modifier le partenaire: {partner.name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Partner: {partner.name}</h1>
       </div>
       <PartnerEditForm initialPartnerData={partner} partnerId={id} />
     </div>

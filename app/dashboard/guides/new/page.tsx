@@ -1,15 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -21,29 +21,57 @@ import { GuideCategory, GuideType } from "@/types/guide"; // Import Guide types
 import { createGuideAction } from "../actions"; // Import the create action
 
 // Zod schema for the form - based on BaseGuideType + some GuideType fields
-// Adapt this schema carefully based on your GuideType and database structure
+// Simplified schema with nested objects instead of JSON strings
 const guideFormSchema = z.object({
-  title: z.string().min(3, { message: "Le titre doit contenir au moins 3 caractères." }),
-  category: z.string().min(1, { message: "Veuillez sélectionner une catégorie." }), // Consider using z.enum(GuideCategory values) if possible
-  mainImage: z.string().url({ message: "Veuillez entrer une URL d'image valide." }),
-  shortDescription: z.string().min(10, { message: "La description courte doit contenir au moins 10 caractères." }),
-  longDescription: z.string().min(20, { message: "La description longue doit contenir au moins 20 caractères." }),
-  slug: z.string().optional(), // Add validation if needed (e.g., regex for slugs)
+  title: z.string().min(3, { message: "Title must be at least 3 characters long." }),
+  category: z.string().min(1, { message: "Please select a category." }),
+  mainImage: z.string().url({ message: "Please enter a valid image URL." }),
+  shortDescription: z.string().min(10, { message: "Short description must be at least 10 characters long." }),
+  longDescription: z.string().min(20, { message: "Long description must be at least 20 characters long." }),
+  slug: z.string().optional(),
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
   isFeatured: z.boolean().optional(),
-  tags: z.string().optional(), // Will be processed into string[] before saving
+  tags: z.string().optional(),
   location: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  galleryImages: z.string().optional(), // Simple comma-separated URLs for now
-  // Placeholder fields for complex types - Needs more elaborate handling
-  sections: z.string().optional(), // e.g., JSON string or handled via dedicated UI
-  items: z.string().optional(), // e.g., JSON string or handled via dedicated UI
-  contacts: z.string().optional(), // e.g., JSON string or handled via dedicated UI
-  practicalInfo: z.string().optional(), // e.g., JSON string or handled via dedicated UI
-  recommendations: z.string().optional(), // e.g., JSON string or handled via dedicated UI
-  testimonials: z.string().optional(), // e.g., JSON string or handled via dedicated UI
+  galleryImages: z.string().optional(),
+  
+  // New structured arrays instead of JSON strings
+  sections: z.array(
+    z.object({
+      title: z.string().min(1, { message: "Section title is required" }),
+      content: z.string().min(1, { message: "Section content is required" }),
+      order: z.number().int().min(1),
+      iconName: z.string().optional(),
+    })
+  ).optional(),
+  
+  items: z.array(
+    z.object({
+      title: z.string().min(1, { message: "Item title is required" }),
+      description: z.string().min(1, { message: "Item description is required" }),
+      tags: z.string().optional(), // Will be processed into string[]
+    })
+  ).optional(),
+  
+  contacts: z.array(
+    z.object({
+      name: z.string().min(1, { message: "Contact name is required" }),
+      type: z.string().min(1, { message: "Contact type is required" }),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      website: z.string().optional(),
+      address: z.string().optional(),
+      description: z.string().optional(),
+    })
+  ).optional(),
+  
+  difficulty: z.string().optional(),
+  duration: z.string().optional(),
+  equipment: z.string().optional(), // Will be processed into string[]
+  facilities: z.string().optional(), // Will be processed into string[]
 });
 
 type GuideFormValues = z.infer<typeof guideFormSchema>;
@@ -82,35 +110,41 @@ export default function NewGuidePage() {
       latitude: 0,
       longitude: 0,
       galleryImages: "",
-      sections: "[]", // Default to empty JSON array string
-      items: "[]",
-      contacts: "[]",
-      practicalInfo: "{}", // Default to empty JSON object string
-      recommendations: "[]",
-      testimonials: "[]",
+      // Initialize structured arrays
+      sections: [{ title: "", content: "", order: 1, iconName: "" }],
+      items: [{ title: "", description: "", tags: "" }],
+      contacts: [{ name: "", type: "", email: "", phone: "", website: "", address: "", description: "" }],
+      difficulty: "",
+      duration: "",
+      equipment: "",
+      facilities: "",
     },
   });
+  
+  // Setup field arrays for dynamic sections
+  const { fields: sectionFields, append: appendSection, remove: removeSection } = 
+    useFieldArray({ control: form.control, name: "sections" });
+    
+  const { fields: itemFields, append: appendItem, remove: removeItem } = 
+    useFieldArray({ control: form.control, name: "items" });
+    
+  const { fields: contactFields, append: appendContact, remove: removeContact } = 
+    useFieldArray({ control: form.control, name: "contacts" });
 
   async function onSubmit(values: GuideFormValues) {
     setIsSubmitting(true);
     try {
       // --- Data Transformation --- 
-      // Transform form values to match the TablesInsert<'guides'> structure
-      // This is crucial and depends heavily on your DB schema and GuideType
       const tagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
       const galleryArray = values.galleryImages ? values.galleryImages.split(',').map(url => url.trim()).filter(Boolean) : [];
+      const equipmentArray = values.equipment ? values.equipment.split(',').map(item => item.trim()).filter(Boolean) : [];
+      const facilitiesArray = values.facilities ? values.facilities.split(',').map(item => item.trim()).filter(Boolean) : [];
       
-      // Attempt to parse JSON strings, default to basic structure on error
-      const parseJsonOrEmpty = (jsonString: string | undefined, defaultVal: any = []) => {
-        if (!jsonString) return defaultVal;
-        try {
-          return JSON.parse(jsonString);
-        } catch (e) {
-          console.warn("Failed to parse JSON string:", jsonString, e);
-          toast({ title: "Erreur de format", description: `Le champ JSON '${jsonString.substring(0,20)}...' est invalide.`, variant: "destructive" });
-          return defaultVal; // Return default on error to avoid submission failure
-        }
-      };
+      // Process item tags into arrays
+      const processedItems = values.items?.map(item => ({
+        ...item,
+        tags: item.tags ? item.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
+      }));
       
       const formattedGuideData = {
         // BaseGuideType fields
@@ -119,49 +153,48 @@ export default function NewGuidePage() {
         mainImage: values.mainImage,
         shortDescription: values.shortDescription,
         longDescription: values.longDescription,
-        slug: values.slug || undefined, // Handle optional slug
+        slug: values.slug || undefined,
         rating: values.rating,
         reviews: values.reviews,
         isFeatured: values.isFeatured,
         tags: tagsArray,
-        // lastUpdatedAt: will be set by DB trigger or default
         location: values.location || undefined,
         coordinates: values.latitude && values.longitude ? { latitude: values.latitude, longitude: values.longitude } : undefined,
         galleryImages: galleryArray,
         
-        // GuideType complex fields (assuming JSON/JSONB columns)
-        // Ensure these match your `TablesInsert<'guides'>` expected types
-        sections: parseJsonOrEmpty(values.sections, []), // Expects Section[] or similar JSON
-        items: parseJsonOrEmpty(values.items, []),       // Expects ListItem[] or similar JSON
-        contacts: parseJsonOrEmpty(values.contacts, []), // Expects Contact[] or similar JSON
-        practicalInfo: parseJsonOrEmpty(values.practicalInfo, {}), // Expects PracticalInfo or similar JSON
-        recommendations: parseJsonOrEmpty(values.recommendations, []), // Expects Recommendation[] or similar JSON
-        testimonials: parseJsonOrEmpty(values.testimonials, []), // Expects Testimonial[] or similar JSON
+        // Directly use the structured arrays instead of parsing JSON
+        sections: values.sections,
+        items: processedItems,
+        contacts: values.contacts,
         
-        // Add any other required fields for TablesInsert<'guides'> with defaults if needed
-        // Example: user_id if you track who created the guide
+        // Extension fields
+        difficulty: values.difficulty || undefined,
+        duration: values.duration || undefined,
+        equipment: equipmentArray,
+        facilities: facilitiesArray,
+        
+        // Default empty values for other fields
+        practicalInfo: {},
+        recommendations: [],
+        testimonials: [],
       };
       
-      // --- Server Action Call --- 
-      const result = await createGuideAction(formattedGuideData as any); // Use `as any` for now due to potential type mismatches
+      const result = await createGuideAction(formattedGuideData as any);
 
-      if (result?.success === false) { // Check for explicit failure from action
-        throw new Error(result.error || "Une erreur inconnue est survenue lors de la création.");
+      if (result?.success === false) {
+        throw new Error(result.error || "An unknown error occurred during creation.");
       }
 
-      // If the action redirects, this part might not be reached
-      // Otherwise, show success toast and navigate
       toast({
-        title: "Succès",
-        description: "Guide créé avec succès !",
+        title: "Success",
+        description: "Guide created successfully!",
       });
-      // router.push("/dashboard/guides"); // Redirect is handled by the action
 
     } catch (error) {
       console.error("Error creating guide:", error);
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible de créer le guide. Veuillez réessayer.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Unable to create guide. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -177,18 +210,17 @@ export default function NewGuidePage() {
             <ArrowLeft className="size-5" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Créer un nouveau guide</h1>
+        <h1 className="text-3xl font-bold">Create a new guide</h1>
       </div>
 
       <Form {...form}>
-        {/* Add novalidate to prevent default browser validation interfering with react-hook-form */}
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-8">
           
           {/* --- General Information Card --- */}
           <Card>
             <CardHeader>
-              <CardTitle>Informations Générales</CardTitle>
-              <CardDescription>Détails de base du guide.</CardDescription>
+              <CardTitle>General Information</CardTitle>
+              <CardDescription>Basic details of the guide.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
@@ -196,9 +228,9 @@ export default function NewGuidePage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre *</FormLabel>
+                    <FormLabel>Title *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Titre du guide" {...field} />
+                      <Input placeholder="Guide title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,17 +242,17 @@ export default function NewGuidePage() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Catégorie *</FormLabel>
+                    <FormLabel>Category *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une catégorie" />
+                          <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {guideCategories.map((cat) => (
                           <SelectItem key={cat} value={cat}>
-                            {cat.replace(/-/g, ' ') /* Simple formatting */} 
+                            {cat.replace(/-/g, ' ')} 
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -237,9 +269,9 @@ export default function NewGuidePage() {
                   <FormItem>
                     <FormLabel>Slug (URL)</FormLabel>
                     <FormControl>
-                      <Input placeholder="titre-du-guide-en-minuscules" {...field} />
+                      <Input placeholder="guide-title-in-lowercase" {...field} />
                     </FormControl>
-                    <FormDescription>Partie de l&apos;URL (optionnel, laisser vide pour auto-génération si configuré).</FormDescription>
+                    <FormDescription>Part of the URL (optional, leave blank for auto-generation if configured).</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -250,7 +282,7 @@ export default function NewGuidePage() {
                 name="mainImage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image Principale (URL) *</FormLabel>
+                    <FormLabel>Main Image (URL) *</FormLabel>
                     <FormControl>
                       <Input type="url" placeholder="https://example.com/image.jpg" {...field} />
                     </FormControl>
@@ -264,16 +296,16 @@ export default function NewGuidePage() {
                 name="shortDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description Courte *</FormLabel>
+                    <FormLabel>Short Description *</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Une description courte et accrocheuse du guide..."
+                        placeholder="A short, catchy description of the guide..."
                         {...field}
                         rows={3} 
                       />
                     </FormControl>
                     <FormDescription>
-                      Ce texte est utilisé pour les aperçus et l&apos;optimisation SEO.
+                      This text is used for previews and SEO optimization.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -285,16 +317,16 @@ export default function NewGuidePage() {
                 name="longDescription"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description Longue *</FormLabel>
+                    <FormLabel>Long Description *</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Contenu principal du guide. Utilisez le markdown pour le formatage si nécessaire."
+                        placeholder="Main content of the guide. Use markdown for formatting if needed."
                         {...field}
                         rows={4}
                       />
                     </FormControl>
                     <FormDescription>
-                      Contenu principal du guide. Utilisez le markdown pour le formatage si nécessaire.
+                      Main content of the guide. Use markdown for formatting if needed.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -306,12 +338,12 @@ export default function NewGuidePage() {
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tags (séparés par des virgules)</FormLabel>
+                    <FormLabel>Tags (comma-separated)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: visa, santé, plage" {...field} />
+                      <Input placeholder="Ex: visa, health, beach" {...field} />
                     </FormControl>
                     <FormDescription>
-                      Mots-clés pour aider à la recherche et au filtrage.
+                      Keywords to help with search and filtering.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -330,14 +362,14 @@ export default function NewGuidePage() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Mettre en avant</FormLabel>
+                      <FormLabel>Feature</FormLabel>
                       <FormDescription>
-                        Le guide apparaîtra dans les sections mises en avant.
+                        The guide will appear in featured sections.
                       </FormDescription>
                     </div>
                   </FormItem>
                 )}
-                />
+              />
 
             </CardContent>
           </Card>
@@ -345,21 +377,21 @@ export default function NewGuidePage() {
           {/* --- Location Information Card --- */}
           <Card>
             <CardHeader>
-              <CardTitle>Localisation (Optionnel)</CardTitle>
-               <CardDescription>Si le guide concerne un lieu spécifique.</CardDescription>
+              <CardTitle>Location (Optional)</CardTitle>
+              <CardDescription>If the guide relates to a specific place.</CardDescription>
             </CardHeader>
-             <CardContent className="space-y-4">
+            <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Lieu (Optionnel)</FormLabel>
+                      <FormLabel>Location (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="Ex: Koh Phangan, Thailand" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Lieu spécifique associé au guide, si pertinent.
+                        Specific location associated with the guide, if relevant.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -411,8 +443,8 @@ export default function NewGuidePage() {
            {/* --- Additional Details Card --- */}
           <Card>
             <CardHeader>
-              <CardTitle>Détails Additionnels</CardTitle>
-              <CardDescription>Informations de localisation, galerie, etc.</CardDescription>
+              <CardTitle>Additional Details</CardTitle>
+              <CardDescription>Ratings, reviews, and gallery images</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -421,7 +453,7 @@ export default function NewGuidePage() {
                       name="rating"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Note (0-5)</FormLabel>
+                          <FormLabel>Rating (0-5)</FormLabel>
                           <FormControl>
                             <Input type="number" step="0.1" min="0" max="5" placeholder="4.5" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} />
                           </FormControl>
@@ -434,7 +466,7 @@ export default function NewGuidePage() {
                       name="reviews"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nombre d&apos;avis</FormLabel>
+                          <FormLabel>Number of reviews</FormLabel>
                           <FormControl>
                             <Input type="number" min="0" placeholder="120" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} />
                           </FormControl>
@@ -448,16 +480,16 @@ export default function NewGuidePage() {
                       name="galleryImages"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Images de la galerie (URLs séparées par des virgules)</FormLabel>
+                          <FormLabel>Gallery Images (URLs separated by commas)</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="https://exemple.com/img1.jpg, https://exemple.com/img2.jpg"
+                              placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg"
                               {...field}
                               rows={3}
                             />
                           </FormControl>
                            <FormDescription>
-                            Ajoutez des URLs d&apos;images supplémentaires pour une galerie.
+                            Add additional image URLs for a gallery.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -466,51 +498,444 @@ export default function NewGuidePage() {
             </CardContent>
           </Card>
           
-           {/* --- Complex Fields (Placeholders) --- */}
+          {/* --- Sections Card (replacing Complex JSON) --- */}
           <Card>
             <CardHeader>
-              <CardTitle>Contenu Spécifique (JSON)</CardTitle>
-              <CardDescription>Modifier ces champs prudemment. Utilisez un format JSON valide pour les listes ([...]) ou objets (&#123;...&#125;).</CardDescription>
+              <CardTitle>Sections</CardTitle>
+              <CardDescription>Add organized content sections for your guide</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Sections */}
+              {sectionFields.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-md space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Section {index + 1}</h4>
+                    {index > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        type="button" 
+                        onClick={() => removeSection(index)}
+                      >
+                        <Trash className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name={`sections.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Section Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="E.g., Introduction, Features, How to Use" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`sections.${index}.content`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Section Content</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Main content text for this section..." 
+                            {...field} 
+                            rows={3}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`sections.${index}.order`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Display Order</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
+                          </FormControl>
+                          <FormDescription>Position in the guide (1 appears first)</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name={`sections.${index}.iconName`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Icon (Optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="E.g., info-circle, map-pin" {...field} />
+                          </FormControl>
+                          <FormDescription>FontAwesome icon name</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendSection({ title: "", content: "", order: sectionFields.length + 1, iconName: "" })}
+              >
+                <Plus className="mr-2 size-4" />
+                Add Section
+              </Button>
+            </CardContent>
+          </Card>
+          
+          {/* --- Items Card --- */}
+          <Card>
+            <CardHeader>
+              <CardTitle>List Items</CardTitle>
+              <CardDescription>Add specific items covered in this guide (features, beaches, trails, etc.)</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {itemFields.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-md space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Item {index + 1}</h4>
+                    {index > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        type="button" 
+                        onClick={() => removeItem(index)}
+                      >
+                        <Trash className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Item Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Name of feature, place, or item" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Item Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Describe this item..." 
+                            {...field} 
+                            rows={2}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.tags`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tags (comma-separated)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="E.g., feature, premium, beach" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendItem({ title: "", description: "", tags: "" })}
+              >
+                <Plus className="mr-2 size-4" />
+                Add Item
+              </Button>
+            </CardContent>
+          </Card>
+          
+          {/* --- Contacts Card --- */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>Add relevant contact details for this guide</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contactFields.map((field, index) => (
+                <div key={field.id} className="p-4 border rounded-md space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">Contact {index + 1}</h4>
+                    {index > 0 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        type="button" 
+                        onClick={() => removeContact(index)}
+                      >
+                        <Trash className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.name`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Contact name or organization" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.type`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <FormControl>
+                            <Input placeholder="E.g., support, information, emergency" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.email`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" placeholder="contact@example.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name={`contacts.${index}.phone`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+66 123 456 789" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name={`contacts.${index}.website`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`contacts.${index}.address`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Physical address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name={`contacts.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Additional information about this contact" {...field} rows={2} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendContact({ 
+                  name: "", 
+                  type: "", 
+                  email: "", 
+                  phone: "", 
+                  website: "", 
+                  address: "", 
+                  description: "" 
+                })}
+              >
+                <Plus className="mr-2 size-4" />
+                Add Contact
+              </Button>
+            </CardContent>
+          </Card>
+          
+          {/* --- Activity/Place Specific Fields --- */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Specific Details</CardTitle>
+              <CardDescription>Add details specific to activities or places</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="sections"
+                name="difficulty"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Sections (JSON)</FormLabel>
-                    <FormControl>
-                      <Textarea className="min-h-40 font-mono text-sm" placeholder='[{"id":"sec1", "title":"Titre Section", "content":"Contenu...", "order":1}]' {...field} />
-                    </FormControl>
-                     <FormDescription>Structure JSON pour les sections du guide. Voir `types/guide.ts`.</FormDescription>
+                    <FormLabel>Difficulty Level</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select difficulty (for activities)">
+                            <SelectItem value="none">Not applicable</SelectItem>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="moderate">Moderate</SelectItem>
+                            <SelectItem value="difficult">Difficult</SelectItem>
+                            <SelectItem value="expert">Expert</SelectItem>
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Not applicable</SelectItem>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="moderate">Moderate</SelectItem>
+                        <SelectItem value="difficult">Difficult</SelectItem>
+                        <SelectItem value="expert">Expert</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>For activities, hikes, etc.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-               <FormField
+              
+              <FormField
                 control={form.control}
-                name="items"
+                name="duration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Éléments de Liste (JSON)</FormLabel>
+                    <FormLabel>Duration</FormLabel>
                     <FormControl>
-                      <Textarea className="min-h-40 font-mono text-sm" placeholder='[{"id":"item1", "title":"Nom Item", "description":"Desc..."}]' {...field} />
+                      <Input placeholder="E.g., 2 hours, half day, 3 days" {...field} />
                     </FormControl>
-                     <FormDescription>Structure JSON pour les éléments listés (plages, restos...). Voir `types/guide.ts`.</FormDescription>
+                    <FormDescription>How long this activity or visit typically takes</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Add similar Textarea fields for contacts, practicalInfo, recommendations, testimonials */}
-             </CardContent>
+              
+              <FormField
+                control={form.control}
+                name="equipment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Equipment Needed (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="E.g., hiking boots, water bottle, sunscreen"
+                        {...field}
+                        rows={2}
+                      />
+                    </FormControl>
+                    <FormDescription>Items needed for this activity</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="facilities"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facilities Available (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="E.g., restrooms, parking, WiFi, restaurants"
+                        {...field}
+                        rows={2}
+                      />
+                    </FormControl>
+                    <FormDescription>Amenities available at this location</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
           </Card>
 
           {/* --- Submission Button --- */}
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Créer le Guide
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Envoi...
+                </>
+              ) : (
+                "Créer le guide"
+              )}
             </Button>
           </div>
         </form>

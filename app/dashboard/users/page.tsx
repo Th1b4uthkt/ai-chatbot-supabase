@@ -1,3 +1,11 @@
+import { PlusCircle, User as UserIcon } from 'lucide-react';
+import Link from 'next/link';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
 
 import { toggleUserAdminStatus } from './actions';
@@ -67,10 +75,18 @@ export default async function UsersPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <ToggleAdminButton
-                    userId={user.id}
-                    isAdmin={user.is_admin || false}
-                  />
+                  <div className="flex space-x-2">
+                    <ToggleAdminButton
+                      userId={user.id}
+                      isAdmin={user.is_admin || false}
+                    />
+                    <Link 
+                      href={`/dashboard/users/${user.id}`}
+                      className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

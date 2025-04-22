@@ -15,11 +15,11 @@ export default async function PartnersPage() {
   // Map categories to more user-friendly names
   const getCategoryLabel = (category: string) => {
     const categoryMap: Record<string, string> = {
-      'location-scooter': 'Location de scooter',
-      'location-voiture': 'Location de voiture',
-      'location-bateau': 'Location de bateau',
-      'location-velo': 'Location de vélo',
-      'hebergement-appartement': 'Appartement',
+      'location-scooter': 'Scooter Rental',
+      'location-voiture': 'Car Rental',
+      'location-bateau': 'Boat Rental',
+      'location-velo': 'Bike Rental',
+      'hebergement-appartement': 'Apartment',
       'hebergement-bungalow': 'Bungalow',
       'hebergement-villa': 'Villa',
       'hebergement-guesthouse': 'Guesthouse',
@@ -35,11 +35,11 @@ export default async function PartnersPage() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Partenaires</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Partners</h2>
         <Link href="/dashboard/partners/new">
           <Button className="hidden md:flex">
             <Plus className="mr-2 size-4" />
-            Ajouter un partenaire
+            Add Partner
           </Button>
           <Button size="icon" className="md:hidden">
             <Plus className="size-4" />
@@ -50,9 +50,9 @@ export default async function PartnersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center">
             <div className="grid gap-2">
-              <CardTitle>Liste des partenaires</CardTitle>
+              <CardTitle>Partner List</CardTitle>
               <CardDescription>
-                Gérez vos partenaires, modifiez-les ou supprimez-les.
+                Manage your partners, edit or delete them.
               </CardDescription>
             </div>
             <div className="ml-auto flex items-center gap-2">
@@ -60,7 +60,7 @@ export default async function PartnersPage() {
                 <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Rechercher..."
+                  placeholder="Search..."
                   className="pl-8 w-full md:w-[300px]"
                 />
               </div>
@@ -70,11 +70,11 @@ export default async function PartnersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Lieu</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Sponsorisé</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>Sponsored</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -82,7 +82,7 @@ export default async function PartnersPage() {
                 {partners.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">
-                      Aucun partenaire trouvé
+                      No partners found
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -92,11 +92,11 @@ export default async function PartnersPage() {
                       <TableCell>{getCategoryLabel(partner.category)}</TableCell>
                       <TableCell>{partner.location}</TableCell>
                       <TableCell>{partner.rating}/5 ({partner.reviews})</TableCell>
-                      <TableCell>{partner.is_sponsored ? 'Oui' : 'Non'}</TableCell>
+                      <TableCell>{partner.is_sponsored ? 'Yes' : 'No'}</TableCell>
                       <TableCell className="text-right">
                         <Link href={`/dashboard/partners/${partner.id}/edit`}>
                           <Button variant="outline" size="sm">
-                            Modifier
+                            Edit
                           </Button>
                         </Link>
                       </TableCell>

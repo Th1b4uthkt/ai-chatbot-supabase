@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react" // Loader might not be needed here anymore
 import Link from "next/link"
-import { notFound, useRouter } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { getEventById } from "@/db/cached-queries"
@@ -29,9 +29,9 @@ export default async function EventEditPage(props: EventEditPageProps) {
     // Option 2: Render a message and link back
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
-        <p className="text-xl text-muted-foreground">Événement non trouvé.</p>
+        <p className="text-xl text-muted-foreground">Event not found.</p>
         <Button asChild variant="outline">
-          <Link href="/dashboard/events">Retour à la liste</Link>
+          <Link href="/dashboard/events">Back to List</Link>
         </Button>
       </div>
     );
@@ -47,7 +47,7 @@ export default async function EventEditPage(props: EventEditPageProps) {
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Modifier l&apos;événement: {event.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Edit Event: {event.title}</h1>
       </div>
       {/* Render the client form component with initial data */}
       <EventEditForm initialEventData={event} eventId={id} />

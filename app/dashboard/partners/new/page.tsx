@@ -14,7 +14,7 @@ export default function NewPartnerPage() {
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">Ajouter un partenaire</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Add Partner</h1>
       </div>
       <NewPartnerForm />
     </div>

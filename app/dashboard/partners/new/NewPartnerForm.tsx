@@ -22,22 +22,22 @@ import { createPartnerAction } from "../actions"
 
 // Basic schema for initial partner form
 const partnerSchema = z.object({
-  name: z.string().min(3, { message: "Le nom doit contenir au moins 3 caractères" }),
-  category: z.string().min(1, { message: "Veuillez sélectionner une catégorie" }),
-  image: z.string().url({ message: "Veuillez entrer une URL d'image valide" }),
-  short_description: z.string().min(10, { message: "La description courte doit contenir au moins 10 caractères" }),
-  location: z.string().min(3, { message: "Le lieu doit contenir au moins 3 caractères" }),
-  price_range: z.string().min(1, { message: "Veuillez sélectionner une gamme de prix" }),
-  open_hours: z.string().min(3, { message: "Veuillez indiquer les heures d'ouverture" }),
-  contact: z.string().min(3, { message: "Veuillez indiquer un contact" }),
+  name: z.string().min(3, { message: "Name must contain at least 3 characters" }),
+  category: z.string().min(1, { message: "Please select a category" }),
+  image: z.string().url({ message: "Please enter a valid image URL" }),
+  short_description: z.string().min(10, { message: "Short description must contain at least 10 characters" }),
+  location: z.string().min(3, { message: "Location must contain at least 3 characters" }),
+  price_range: z.string().min(1, { message: "Please select a price range" }),
+  open_hours: z.string().min(3, { message: "Please indicate opening hours" }),
+  contact: z.string().min(3, { message: "Please indicate a contact" }),
   latitude: z.number(),
   longitude: z.number(),
   is_sponsored: z.boolean().optional(),
-  long_description: z.string().min(20, { message: "La description longue doit contenir au moins 20 caractères" }),
-  email: z.string().email({ message: "Veuillez entrer une adresse email valide" }).optional().or(z.literal('')),
-  website: z.string().url({ message: "Veuillez entrer une URL valide" }).optional().or(z.literal('')),
-  rating: z.number().min(0, { message: "La note doit être entre 0 et 5" }).max(5),
-  reviews: z.number().min(0, { message: "Le nombre d'avis doit être positif" }),
+  long_description: z.string().min(20, { message: "Long description must contain at least 20 characters" }),
+  email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal('')),
+  website: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal('')),
+  rating: z.number().min(0, { message: "Rating must be between 0 and 5" }).max(5),
+  reviews: z.number().min(0, { message: "Number of reviews must be positive" }),
 });
 
 type FormValues = z.infer<typeof partnerSchema>;
@@ -103,8 +103,8 @@ export function NewPartnerForm() {
       
       if (result.success) {
         toast({
-          title: "Succès",
-          description: "Partenaire créé avec succès",
+          title: "Success",
+          description: "Partner created successfully",
         })
         router.push(`/dashboard/partners`)
       } else {
@@ -113,8 +113,8 @@ export function NewPartnerForm() {
     } catch (error) {
       console.error("Error creating partner:", error)
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Impossible de créer le partenaire. Veuillez réessayer.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Could not create partner. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -124,11 +124,11 @@ export function NewPartnerForm() {
 
   // Partner category options
   const categoryOptions = [
-    { value: "location-scooter", label: "Location de scooter" },
-    { value: "location-voiture", label: "Location de voiture" },
-    { value: "location-bateau", label: "Location de bateau" },
-    { value: "location-velo", label: "Location de vélo" },
-    { value: "hebergement-appartement", label: "Appartement" },
+    { value: "location-scooter", label: "Scooter Rental" },
+    { value: "location-voiture", label: "Car Rental" },
+    { value: "location-bateau", label: "Boat Rental" },
+    { value: "location-velo", label: "Bike Rental" },
+    { value: "hebergement-appartement", label: "Apartment" },
     { value: "hebergement-bungalow", label: "Bungalow" },
     { value: "hebergement-villa", label: "Villa" },
     { value: "hebergement-guesthouse", label: "Guesthouse" },
@@ -136,13 +136,13 @@ export function NewPartnerForm() {
     { value: "cafe", label: "Café" },
     { value: "bar", label: "Bar" },
     { value: "street-food", label: "Street Food" },
-    { value: "salon-massage", label: "Salon de massage" },
+    { value: "salon-massage", label: "Massage Parlor" },
     { value: "spa", label: "Spa" },
-    { value: "yoga-meditation", label: "Yoga & Méditation" },
-    { value: "medical", label: "Services médicaux" },
+    { value: "yoga-meditation", label: "Yoga & Meditation" },
+    { value: "medical", label: "Medical Services" },
     { value: "excursion", label: "Excursions" },
-    { value: "plongee", label: "Plongée" },
-    { value: "cours", label: "Cours & Formations" },
+    { value: "plongee", label: "Diving" },
+    { value: "cours", label: "Courses & Training" },
   ];
 
   return (
@@ -150,16 +150,16 @@ export function NewPartnerForm() {
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general">Général</TabsTrigger>
-            <TabsTrigger value="details">Détails</TabsTrigger>
-            <TabsTrigger value="location">Localisation</TabsTrigger>
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="location">Location</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Informations générales</CardTitle>
-                <CardDescription>Informations essentielles sur le partenaire</CardDescription>
+                <CardTitle>General Information</CardTitle>
+                <CardDescription>Essential information about the partner</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -167,10 +167,13 @@ export function NewPartnerForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nom</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom du partenaire" {...field} />
+                        <Input placeholder="Partner Name" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Le nom officiel du partenaire.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -180,11 +183,11 @@ export function NewPartnerForm() {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Catégorie</FormLabel>
+                      <FormLabel>Category</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une catégorie" />
+                            <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -217,9 +220,9 @@ export function NewPartnerForm() {
                   name="short_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description courte</FormLabel>
+                      <FormLabel>Short Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Description courte du partenaire" {...field} />
+                        <Textarea placeholder="Short description of the partner" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -230,18 +233,18 @@ export function NewPartnerForm() {
                   name="price_range"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Gamme de prix</FormLabel>
+                      <FormLabel>Price Range</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une gamme de prix" />
+                            <SelectValue placeholder="Select a price range" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="$">$ (Économique)</SelectItem>
-                          <SelectItem value="$$">$$ (Moyen)</SelectItem>
-                          <SelectItem value="$$$">$$$ (Haut de gamme)</SelectItem>
-                          <SelectItem value="$$$$">$$$$ (Luxe)</SelectItem>
+                          <SelectItem value="$">$ (Budget)</SelectItem>
+                          <SelectItem value="$$">$$ (Mid-range)</SelectItem>
+                          <SelectItem value="$$$">$$$ (High-end)</SelectItem>
+                          <SelectItem value="$$$$">$$$$ (Luxury)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -254,7 +257,7 @@ export function NewPartnerForm() {
                     name="rating"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Note</FormLabel>
+                        <FormLabel>Rating</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -265,7 +268,7 @@ export function NewPartnerForm() {
                             onChange={e => field.onChange(parseFloat(e.target.value))} 
                           />
                         </FormControl>
-                        <FormDescription>Note de 0 à 5</FormDescription>
+                        <FormDescription>Rating from 0 to 5</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -275,7 +278,7 @@ export function NewPartnerForm() {
                     name="reviews"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Nombre d avis</FormLabel>
+                        <FormLabel>Number of Reviews</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -296,8 +299,8 @@ export function NewPartnerForm() {
           <TabsContent value="details" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Détails</CardTitle>
-                <CardDescription>Informations détaillées sur le partenaire</CardDescription>
+                <CardTitle>Details</CardTitle>
+                <CardDescription>Detailed information about the partner</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -305,9 +308,9 @@ export function NewPartnerForm() {
                   name="long_description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description longue</FormLabel>
+                      <FormLabel>Long Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Description complète du partenaire" className="min-h-32" {...field} />
+                        <Textarea placeholder="Full description of the partner" className="min-h-32" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -322,7 +325,7 @@ export function NewPartnerForm() {
                       <FormControl>
                         <Input placeholder="Ex: +66 12 345 6789" {...field} />
                       </FormControl>
-                       <FormDescription>Numéro de téléphone ou autre contact principal.</FormDescription>
+                       <FormDescription>Phone number or other main contact.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -332,9 +335,9 @@ export function NewPartnerForm() {
                   name="open_hours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Heures d ouverture</FormLabel>
+                      <FormLabel>Opening Hours</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: 9:00 - 18:00" {...field} />
+                        <Input placeholder="Ex: 9:00 AM - 6:00 PM" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -358,11 +361,13 @@ export function NewPartnerForm() {
                   name="website"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Site Web</FormLabel>
+                      <FormLabel>Website</FormLabel>
                       <FormControl>
                         <Input type="url" placeholder="https://example.com" {...field} />
                       </FormControl>
-                       <FormDescription>L URL du site web (optionnel).</FormDescription>
+                       <FormDescription>
+                        L&apos;URL complète du site web du partenaire.
+                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -374,8 +379,8 @@ export function NewPartnerForm() {
           <TabsContent value="location" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Localisation</CardTitle>
-                <CardDescription>Informations sur l emplacement du partenaire</CardDescription>
+                <CardTitle>Location</CardTitle>
+                <CardDescription>Information about the partners location</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
@@ -383,7 +388,7 @@ export function NewPartnerForm() {
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Adresse</FormLabel>
+                      <FormLabel>Address</FormLabel>
                       <FormControl>
                         <Input placeholder="123 Beach Road, Thong Sala" {...field} />
                       </FormControl>
@@ -437,9 +442,9 @@ export function NewPartnerForm() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel>Sponsorisé</FormLabel>
+                        <FormLabel>Sponsored</FormLabel>
                         <FormDescription>
-                          Mettre en avant ce partenaire comme sponsorisé.
+                          Highlight this partner as sponsored.
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -458,10 +463,10 @@ export function NewPartnerForm() {
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 size-4 animate-spin" />
-              Création...
+              Creating...
             </>
           ) : (
-            "Créer le partenaire"
+            "Create Partner"
           )}
         </Button>
       </form>

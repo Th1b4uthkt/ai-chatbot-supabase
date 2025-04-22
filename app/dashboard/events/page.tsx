@@ -15,11 +15,11 @@ export default async function EventsPage() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Événements</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Events</h2>
         <Link href="/dashboard/events/new">
           <Button className="hidden md:flex">
             <Plus className="mr-2 size-4" />
-            Créer un événement
+            Create Event
           </Button>
           <Button size="icon" className="md:hidden">
             <Plus className="size-4" />
@@ -30,9 +30,9 @@ export default async function EventsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center">
             <div className="grid gap-2">
-              <CardTitle>Liste des événements</CardTitle>
+              <CardTitle>Event List</CardTitle>
               <CardDescription>
-                Gérez vos événements, modifiez-les ou supprimez-les.
+                Manage your events, edit or delete them.
               </CardDescription>
             </div>
             <div className="ml-auto flex items-center gap-2">
@@ -40,7 +40,7 @@ export default async function EventsPage() {
                 <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Rechercher..."
+                  placeholder="Search..."
                   className="pl-8 w-full md:w-[300px]"
                 />
               </div>
@@ -50,11 +50,11 @@ export default async function EventsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Lieu</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Location</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Prix</TableHead>
+                  <TableHead>Price</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -62,7 +62,7 @@ export default async function EventsPage() {
                 {events.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">
-                      Aucun événement trouvé
+                      No events found
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -76,7 +76,7 @@ export default async function EventsPage() {
                       <TableCell className="text-right">
                         <Link href={`/dashboard/events/${event.id}/edit`}>
                           <Button variant="outline" size="sm">
-                            Modifier
+                            Edit
                           </Button>
                         </Link>
                       </TableCell>

@@ -38,7 +38,7 @@ export default async function EditGuidePage(props: EditGuidePageProps) {
           </Link>
         </Button>
         {/* Use fetched data directly for the title */}
-        <h1 className="text-3xl font-bold">Modifier le guide: {guideData.title}</h1>
+        <h1 className="text-3xl font-bold">Edit guide: {guideData.title}</h1>
       </div>
 
       {/* Render the Client Component form, passing the fetched data */}
