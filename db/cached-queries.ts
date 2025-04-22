@@ -15,6 +15,7 @@ import {
   getSessionQuery,
   getUserByIdQuery,
   getUserQuery,
+  getUsersCountQuery,
   getChatWithMessagesQuery,
   getUserProfileQuery,
   isUserAdminQuery,
@@ -47,6 +48,21 @@ export const getSession = async () => {
     {
       tags: [`session`],
       revalidate: 10, // Cache for 10 seconds
+    }
+  )();
+};
+
+export const getUsersCount = async () => {
+  const supabase = await getSupabase();
+  
+  return unstable_cache(
+    async () => {
+      return getUsersCountQuery(supabase);
+    },
+    ['users_count'],
+    {
+      tags: ['users_count'],
+      revalidate: 30, // Cache for 30 seconds
     }
   )();
 };
@@ -236,12 +252,32 @@ export const isUserAdmin = async (userId: string) => {
 
 export const getEvents = async () => {
   const client = await getSupabase();
-  return getEventsQuery(client);
+  
+  return unstable_cache(
+    async () => {
+      return getEventsQuery(client);
+    },
+    ['events_list'],
+    {
+      tags: ['events_list'],
+      revalidate: 5 // Cache for 5 seconds
+    }
+  )();
 };
 
 export const getEventById = async (id: string) => {
   const client = await getSupabase();
-  return getEventByIdQuery(client, id);
+  
+  return unstable_cache(
+    async () => {
+      return getEventByIdQuery(client, id);
+    },
+    ['event', id],
+    {
+      tags: [`event_${id}`],
+      revalidate: 5 // Cache for 5 seconds
+    }
+  )();
 };
 
 export const createEvent = async (eventData: TablesInsert<'events'>) => {
@@ -261,12 +297,32 @@ export const deleteEvent = async (id: string) => {
 
 export const getPartners = async () => {
   const client = await getSupabase();
-  return getPartnersQuery(client);
+  
+  return unstable_cache(
+    async () => {
+      return getPartnersQuery(client);
+    },
+    ['partners_list'],
+    {
+      tags: ['partners_list'],
+      revalidate: 5 // Cache for 5 seconds
+    }
+  )();
 };
 
 export const getPartnerById = async (id: string) => {
   const client = await getSupabase();
-  return getPartnerByIdQuery(client, id);
+  
+  return unstable_cache(
+    async () => {
+      return getPartnerByIdQuery(client, id);
+    },
+    ['partner', id],
+    {
+      tags: [`partner_${id}`],
+      revalidate: 5 // Cache for 5 seconds
+    }
+  )();
 };
 
 export const getPartnersByCategory = async (category: string) => {

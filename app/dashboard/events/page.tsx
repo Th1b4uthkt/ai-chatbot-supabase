@@ -1,14 +1,17 @@
-import { CalendarDays, MapPin, Plus, Search, Tag, Ticket, Trash2, Pencil } from "lucide-react"
+import { CalendarDays, MapPin, Plus, Search, Tag, Ticket, Trash2, Pencil, CheckSquare, CalendarClock } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { getEvents } from "@/db/cached-queries"
 import { formatDate } from "@/lib/utils"
+
+import { SponsorControl } from "../components/SponsorControl"
 
 export default async function EventsPage() {
   const events = await getEvents()
@@ -50,13 +53,14 @@ export default async function EventsPage() {
                   <TableHead><MapPin className="inline-block mr-1 size-4" />Location</TableHead>
                   <TableHead><CalendarDays className="inline-block mr-1 size-4" />Date</TableHead>
                   <TableHead><Ticket className="inline-block mr-1 size-4" />Price</TableHead>
+                  <TableHead><CheckSquare className="inline-block mr-1 size-4" />Sponsored</TableHead>
                   <TableHead className="text-right w-[120px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {events.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                       No events found. Start by creating one!
                     </TableCell>
                   </TableRow>
@@ -90,6 +94,14 @@ export default async function EventsPage() {
                           ) : (
                             <span className="text-muted-foreground italic">N/A</span>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          <SponsorControl 
+                            itemId={event.id}
+                            itemType="event"
+                            initialIsSponsored={!!event.is_sponsored}
+                            initialSponsorEndDate={event.sponsor_end_date || null}
+                          />
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end space-x-2">

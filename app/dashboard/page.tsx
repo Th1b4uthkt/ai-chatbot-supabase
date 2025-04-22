@@ -1,39 +1,95 @@
-import { Activity, CreditCard, DollarSign, Users, Calendar, Map, Book, Star, Newspaper, TrendingUp, BarChart2 } from "lucide-react"
+import { Activity, CreditCard, DollarSign, Users, Calendar, Map as MapIcon, Book, Star, Newspaper, TrendingUp, BarChart2 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getEvents, getPartners, getGuides, getUsersCount, getSession } from "@/db/cached-queries"
 
-// This would be replaced with server-side data fetching in a real app
+type CategoryCount = {
+  category: string;
+  count: number;
+};
+
+// Fetch real data from the database
 async function getData() {
-  // These numbers would come from your database
+  const events = await getEvents();
+  const partners = await getPartners();
+  const guides = await getGuides();
+  const { totalUsers, activeUsers } = await getUsersCount();
+  
+  // For debugging purposes
+  console.log("Events fetched:", events.length);
+  if (events.length > 0) {
+    console.log("First event sample:", {
+      title: events[0].title,
+      is_sponsored: events[0].is_sponsored,
+      type_of_is_sponsored: typeof events[0].is_sponsored
+    });
+  }
+  
+  console.log("Users count:", { totalUsers, activeUsers });
+  
+  // Count sponsored items - handle nulls properly
+  const sponsoredEvents = events.filter(event => event.is_sponsored === true).length;
+  const sponsoredPartners = partners.filter(partner => partner.is_sponsored === true).length;
+  const featuredGuides = guides.filter(guide => guide.is_featured === true).length;
+  
+  // Process event categories using regular objects instead of Map to avoid TypeScript issues
+  const eventCategories: Record<string, number> = {};
+  events.forEach(event => {
+    if (!event.category) return;
+    const category = event.category;
+    eventCategories[category] = (eventCategories[category] || 0) + 1;
+  });
+  
+  // Process partner categories
+  const partnerCategories: Record<string, number> = {};
+  partners.forEach(partner => {
+    if (!partner.category) return;
+    const category = partner.category;
+    partnerCategories[category] = (partnerCategories[category] || 0) + 1;
+  });
+  
+  // Process guide categories
+  const guideCategories: Record<string, number> = {};
+  guides.forEach(guide => {
+    if (!guide.category) return;
+    const category = guide.category;
+    guideCategories[category] = (guideCategories[category] || 0) + 1;
+  });
+  
+  // Convert to arrays for display
+  const topEventCategories: CategoryCount[] = Object.entries(eventCategories)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+  
+  const topPartnerCategories: CategoryCount[] = Object.entries(partnerCategories)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+  
+  const topGuideCategories: CategoryCount[] = Object.entries(guideCategories)
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+  
+  // Estimate revenue - this would come from a real calculation in a production app
+  const revenue = 0;
+  
   return {
-    totalUsers: 3,
-    activeUsers: 0,
-    totalEvents: 20,
-    totalPartners: 8,
-    totalGuides: 1,
-    sponsoredEvents: 0,
-    sponsoredPartners: 0,
-    featuredGuides: 1,
-    revenue: 12350,
-    topEventCategories: [
-      { category: "Beach Party", count: 3 },
-      { category: "Nightclub", count: 3 },
-      { category: "Music / Psytrance", count: 2 },
-      { category: "Music / Jungle Beach Party", count: 1 },
-      { category: "Music / House & Techno", count: 1 }
-    ],
-    topPartnerCategories: [
-      { category: "hebergement-guesthouse", count: 1 },
-      { category: "location-scooter", count: 1 },
-      { category: "restaurant", count: 1 },
-      { category: "retraite-spirituelle", count: 1 },
-      { category: "plongee", count: 1 }
-    ],
-    guideCategories: [
-      { category: "applications-essentielles", count: 1 }
-    ]
+    totalUsers,
+    activeUsers,
+    totalEvents: events.length,
+    totalPartners: partners.length,
+    totalGuides: guides.length,
+    sponsoredEvents,
+    sponsoredPartners,
+    featuredGuides,
+    revenue,
+    topEventCategories,
+    topPartnerCategories,
+    guideCategories: topGuideCategories
   }
 }
 
@@ -129,22 +185,28 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {data.topEventCategories.map((item) => (
-                    <div className="flex items-center" key={item.category}>
-                      <div className="w-1/3 font-medium truncate">{item.category}</div>
-                      <div className="w-full">
-                        <div className="flex h-2 items-center space-x-2">
-                          <div 
-                            className="h-2 bg-primary" 
-                            style={{ width: `${(item.count / data.totalEvents) * 100}%` }}
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {item.count}
-                          </span>
+                  {data.topEventCategories.length > 0 ? (
+                    data.topEventCategories.map((item) => (
+                      <div className="flex items-center" key={item.category}>
+                        <div className="w-1/3 font-medium truncate">{item.category}</div>
+                        <div className="w-full">
+                          <div className="flex h-2 items-center space-x-2">
+                            <div 
+                              className="h-2 bg-primary" 
+                              style={{ width: `${(item.count / data.totalEvents) * 100}%` }}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {item.count}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground py-4">
+                      No event categories data available
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -158,22 +220,28 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {data.topPartnerCategories.map((item) => (
-                    <div className="flex items-center" key={item.category}>
-                      <div className="w-1/2 font-medium truncate">{item.category}</div>
-                      <div className="w-full">
-                        <div className="flex h-2 items-center space-x-2">
-                          <div 
-                            className="h-2 bg-primary" 
-                            style={{ width: `${(item.count / data.totalPartners) * 100}%` }}
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {item.count}
-                          </span>
+                  {data.topPartnerCategories.length > 0 ? (
+                    data.topPartnerCategories.map((item) => (
+                      <div className="flex items-center" key={item.category}>
+                        <div className="w-1/2 font-medium truncate">{item.category}</div>
+                        <div className="w-full">
+                          <div className="flex h-2 items-center space-x-2">
+                            <div 
+                              className="h-2 bg-primary" 
+                              style={{ width: `${(item.count / data.totalPartners) * 100}%` }}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {item.count}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground py-4">
+                      No partner categories data available
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>

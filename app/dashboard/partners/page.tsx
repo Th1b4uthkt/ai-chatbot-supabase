@@ -1,13 +1,16 @@
-import { Plus, Search } from "lucide-react"
+import { Plus, Search, CheckSquare, CalendarClock } from "lucide-react"
 import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getPartners } from "@/db/cached-queries"
 import { formatDate } from "@/lib/utils"
+
+import { SponsorControl } from "../components/SponsorControl"
 
 export default async function PartnersPage() {
   // Fetch partners from Supabase
@@ -75,7 +78,7 @@ export default async function PartnersPage() {
                   <TableHead className="font-medium">Category</TableHead>
                   <TableHead className="font-medium">Location</TableHead>
                   <TableHead className="font-medium">Rating</TableHead>
-                  <TableHead className="font-medium">Sponsored</TableHead>
+                  <TableHead><CheckSquare className="inline-block mr-1 size-4" />Sponsored</TableHead>
                   <TableHead className="text-right font-medium">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -104,10 +107,12 @@ export default async function PartnersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {partner.is_sponsored ? 
-                          <Badge className="bg-accent text-accent-foreground">Yes</Badge> : 
-                          <Badge variant="outline" className="text-muted-foreground">No</Badge>
-                        }
+                        <SponsorControl
+                          itemId={partner.id}
+                          itemType="partner"
+                          initialIsSponsored={!!partner.is_sponsored}
+                          initialSponsorEndDate={partner.sponsor_end_date || null}
+                        />
                       </TableCell>
                       <TableCell className="text-right">
                         <Link href={`/dashboard/partners/${partner.id}/edit`}>
