@@ -15,6 +15,10 @@ export interface EventType {
   };
   day: number; // 0-6 representing days of the week (Sunday-Saturday)
 
+  // New fields for sponsored content
+  is_sponsored?: boolean; 
+  sponsor_end_date?: string; // ISO date string when sponsorship ends
+
   // New fields for enhanced event data
   organizer?: {
     name: string;

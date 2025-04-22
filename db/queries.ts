@@ -1,8 +1,22 @@
 import { AuthError } from '@supabase/supabase-js';
 import type { Client, Database } from '../lib/supabase/types';
 
+// Define the database tables type
 type Tables = Database['public']['Tables'];
 
+// Handler for database errors
+export function handleSupabaseError(error: any) {
+  if (error) {
+    console.error('Database error:', error);
+    if (error.code === 'PGRST116') {
+      return null; // Not found
+    }
+    throw error;
+  }
+  return null;
+}
+
+// Session and User queries
 export async function getSessionQuery(client: Client) {
   const {
     data: { user },
@@ -47,6 +61,7 @@ export async function getUserQuery(client: Client, email: string) {
   return users;
 }
 
+// Chat queries
 export async function saveChatQuery(
   client: Client,
   {
@@ -98,6 +113,7 @@ export async function getChatByIdQuery(client: Client, { id }: { id: string }) {
   return chat;
 }
 
+// Message queries
 export async function getMessagesByChatIdQuery(
   client: Client,
   { id }: { id: string }
@@ -132,6 +148,7 @@ export async function saveMessagesQuery(
   if (error) throw error;
 }
 
+// Vote queries
 export async function voteMessageQuery(
   client: Client,
   {
@@ -182,6 +199,7 @@ export async function getVotesByChatIdQuery(
   return votes;
 }
 
+// Document queries
 export async function getDocumentByIdQuery(
   client: Client,
   { id }: { id: string }
@@ -221,6 +239,7 @@ export async function saveDocumentQuery(
   if (error) throw error;
 }
 
+// Suggestion queries
 export async function getSuggestionsByDocumentIdQuery(
   client: Client,
   { documentId }: { documentId: string }
@@ -291,6 +310,7 @@ export async function getDocumentsByIdQuery(
   return documents;
 }
 
+// Combined queries
 export async function getChatWithMessagesQuery(
   client: Client,
   { id }: { id: string }
@@ -322,19 +342,296 @@ export async function getChatWithMessagesQuery(
   };
 }
 
-type PostgrestError = {
-  code: string;
-  message: string;
-  details: string | null;
-  hint: string | null;
-};
+// Profile queries
+export async function getUserProfileQuery(client: Client, userId: string) {
+  const { data: profile, error } = await client
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
 
-export function handleSupabaseError(error: PostgrestError | null) {
-  if (!error) return null;
+  if (error) {
+    throw {
+      message: error.message,
+      status: error?.code ? 400 : 500,
+    } as AuthError;
+  }
 
-  if (error.code === 'PGRST116') {
+  return profile;
+}
+
+export async function isUserAdminQuery(client: Client, userId: string) {
+  const { data: profile, error } = await client
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw {
+      message: error.message,
+      status: error?.code ? 400 : 500,
+    } as AuthError;
+  }
+
+  return profile?.is_admin || false;
+}
+
+// Event queries
+export async function getEventsQuery(client: Client) {
+  const { data, error } = await client
+    .from('events')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    handleSupabaseError(error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function getEventByIdQuery(client: Client, id: string) {
+  const { data, error } = await client
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
     return null;
   }
 
-  throw error;
+  return data;
+}
+
+export async function createEventQuery(
+  client: Client,
+  eventData: Tables['events']['Insert']
+) {
+  const { data, error } = await client
+    .from('events')
+    .insert(eventData)
+    .select()
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateEventQuery(
+  client: Client,
+  id: string,
+  eventData: Tables['events']['Update']
+) {
+  const { data, error } = await client
+    .from('events')
+    .update(eventData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function deleteEventQuery(client: Client, id: string) {
+  const { error } = await client
+    .from('events')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    handleSupabaseError(error);
+    return false;
+  }
+
+  return true;
+}
+
+// Guide queries
+export async function getGuidesQuery(client: Client) {
+  const { data, error } = await client
+    .from('guides')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    handleSupabaseError(error);
+    return [];
+  }
+
+  return data as any[];
+}
+
+export async function getGuideByIdQuery(client: Client, id: string) {
+  const { data, error } = await client
+    .from('guides')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data as any;
+}
+
+export async function createGuideQuery(
+  client: Client,
+  guideData: Tables['guides']['Insert']
+) {
+  const { data, error } = await client
+    .from('guides')
+    .insert(guideData)
+    .select('id')
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data?.id;
+}
+
+export async function updateGuideQuery(
+  client: Client,
+  id: string,
+  guideData: Tables['guides']['Update']
+) {
+  const { error } = await client
+    .from('guides')
+    .update(guideData)
+    .eq('id', id);
+
+  if (error) {
+    handleSupabaseError(error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function deleteGuideQuery(client: Client, id: string) {
+  const { error } = await client
+    .from('guides')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    handleSupabaseError(error);
+    return false;
+  }
+
+  return true;
+}
+
+// Partner queries
+export async function getPartnersQuery(client: Client) {
+  const { data, error } = await client
+    .from('partners')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    handleSupabaseError(error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function getPartnerByIdQuery(client: Client, id: string) {
+  const { data, error } = await client
+    .from('partners')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getPartnersByCategoryQuery(client: Client, category: string) {
+  const { data, error } = await client
+    .from('partners')
+    .select('*')
+    .eq('category', category)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    handleSupabaseError(error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function createPartnerQuery(
+  client: Client,
+  partnerData: Tables['partners']['Insert']
+) {
+  const { data, error } = await client
+    .from('partners')
+    .insert(partnerData)
+    .select()
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updatePartnerQuery(
+  client: Client,
+  id: string,
+  partnerData: Tables['partners']['Update']
+) {
+  const { data, error } = await client
+    .from('partners')
+    .update(partnerData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    handleSupabaseError(error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function deletePartnerQuery(client: Client, id: string) {
+  const { error } = await client
+    .from('partners')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    handleSupabaseError(error);
+    return false;
+  }
+
+  return true;
 }

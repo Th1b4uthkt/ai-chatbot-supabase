@@ -161,6 +161,80 @@ export type Database = {
           },
         ];
       };
+      profiles: {
+        Row: {
+          id: string;
+          username: string | null;
+          name: string | null;
+          bio: string | null;
+          avatar: string | null;
+          join_date: string;
+          location: string | null;
+          events_attended: number | null;
+          favorite_places: Json | null;
+          interests: string[] | null;
+          social_links: Json | null;
+          notifications: Json | null;
+          privacy_settings: Json | null;
+          preferences: Json | null;
+          payment_methods: Json | null;
+          created_at: string;
+          updated_at: string;
+          email: string;
+          is_admin: boolean;
+        };
+        Insert: {
+          id: string;
+          username?: string | null;
+          name?: string | null;
+          bio?: string | null;
+          avatar?: string | null;
+          join_date?: string;
+          location?: string | null;
+          events_attended?: number | null;
+          favorite_places?: Json | null;
+          interests?: string[] | null;
+          social_links?: Json | null;
+          notifications?: Json | null;
+          privacy_settings?: Json | null;
+          preferences?: Json | null;
+          payment_methods?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+          email: string;
+          is_admin?: boolean;
+        };
+        Update: {
+          id?: string;
+          username?: string | null;
+          name?: string | null;
+          bio?: string | null;
+          avatar?: string | null;
+          join_date?: string;
+          location?: string | null;
+          events_attended?: number | null;
+          favorite_places?: Json | null;
+          interests?: string[] | null;
+          social_links?: Json | null;
+          notifications?: Json | null;
+          privacy_settings?: Json | null;
+          preferences?: Json | null;
+          payment_methods?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+          email?: string;
+          is_admin?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey';
+            columns: ['id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       suggestions: {
         Row: {
           created_at: string;
