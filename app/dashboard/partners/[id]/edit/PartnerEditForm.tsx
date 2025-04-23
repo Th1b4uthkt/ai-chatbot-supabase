@@ -15,35 +15,121 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { mapDbToPartner, mapPartnerToDb } from "@/lib/supabase/mappers"
 import { Tables } from "@/lib/supabase/types"
-import { PartnerCategory } from "@/types/partner"
+import { Partner, PriceIndicator, PartnerSection, EstablishmentCategory, ServiceCategory, PartnerSubcategory } from "@/types/partner/partner"
 
 import { updatePartnerAction } from "../../actions"
 
 // Define the partner type from Supabase schema
 type PartnerRow = Tables<'partners'>;
+type PartnerFormValues = z.infer<typeof partnerSchema>; // USE Zod-inferred type
 
-// Basic schema for initial partner edit form
-// Note: This is a simplified schema - in a real app you'd want to handle 
-// all the different partner types and their specific fields
+// Type for Price Indicator values - needed for Zod enum
+const priceIndicatorValues: [PriceIndicator, ...PriceIndicator[]] = [
+  "€", "€€", "€€€", "€€€€", "Free", "Varies"
+];
+
+// Updated Zod schema reflecting Partner structure
 const partnerSchema = z.object({
+  id: z.string(), // Keep id for reference
   name: z.string().min(3, { message: "Name must contain at least 3 characters" }),
-  category: z.string().min(1, { message: "Please select a category" }),
-  image: z.string().url({ message: "Please enter a valid image URL" }),
-  short_description: z.string().min(10, { message: "Short description must contain at least 10 characters" }),
-  location: z.string().min(3, { message: "Location must contain at least 3 characters" }),
-  price_range: z.string().min(1, { message: "Please select a price range" }),
-  open_hours: z.string().min(3, { message: "Please indicate opening hours" }),
-  contact: z.string().min(3, { message: "Please indicate a contact" }),
-  latitude: z.number(),
-  longitude: z.number(),
-  is_sponsored: z.boolean().optional(),
-  long_description: z.string().min(20, { message: "Long description must contain at least 20 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal('')),
-  website: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal(''))
+  section: z.nativeEnum(PartnerSection),
+  // Use union of enums for mainCategory validation
+  mainCategory: z.union([
+      z.nativeEnum(EstablishmentCategory),
+      z.nativeEnum(ServiceCategory)
+  ]),
+  subcategory: z.nativeEnum(PartnerSubcategory),
+  images: z.object({
+    main: z.string().url({ message: "Please enter a valid main image URL" }),
+    gallery: z.array(z.string().url()).optional(),
+  }),
+  description: z.object({
+    short: z.string().min(10, { message: "Short description must contain at least 10 characters" }),
+    long: z.string().min(20, { message: "Long description must contain at least 20 characters" }),
+  }),
+  location: z.object({
+    address: z.string().min(3, { message: "Address must contain at least 3 characters" }),
+    coordinates: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }).optional(),
+    area: z.string().optional(),
+  }),
+  contact: z.object({
+    phone: z.string().optional(),
+    email: z.string().email({ message: "Please enter a valid email address" }).optional().or(z.literal('')),
+    website: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal('')),
+    lineId: z.string().optional(),
+    social: z.object({
+      facebook: z.string().url().optional(),
+      instagram: z.string().url().optional(),
+      twitter: z.string().url().optional(),
+    }).optional(),
+  }),
+  hours: z.object({
+      regularHours: z.string().optional(),
+      seasonalChanges: z.string().optional(),
+      open24h: z.boolean().optional(),
+  }),
+  rating: z.object({
+      score: z.number().min(0).max(5).optional(),
+      reviewCount: z.number().int().min(0).optional(),
+      // testimonials are complex, handle separately if needed in form
+  }).optional(),
+  tags: z.array(z.string()).optional(),
+  prices: z.object({
+      priceRange: z.enum(priceIndicatorValues), // Validate against specific PriceIndicator values
+      currency: z.string().optional(),
+  }),
+  features: z.array(z.string()).optional(),
+  languages: z.array(z.string()).optional(),
+  // createdAt and updatedAt are managed by DB
+  promotion: z.object({
+      isSponsored: z.boolean(),
+      isFeatured: z.boolean().optional(),
+      promotionEndsAt: z.string().optional(), // Consider date validation
+      // discount object - handle separately if needed
+  }).optional(),
+  accessibility: z.object({
+      wheelchairAccessible: z.boolean().optional(),
+      familyFriendly: z.boolean().optional(),
+      petFriendly: z.boolean().optional(),
+  }).optional(),
+  paymentOptions: z.object({
+    cash: z.boolean().optional(),
+    creditCard: z.boolean().optional(),
+    mobilePay: z.boolean().optional(),
+    cryptoCurrency: z.boolean().optional(),
+    acceptedCards: z.array(z.string()).optional(),
+  }).optional(),
+  // faq - handle separately if needed
+  // attributes - handle dynamically based on category
 });
 
-type FormValues = z.infer<typeof partnerSchema>;
+// We need a mapper from DB Row to Form Values (PartnerType)
+// This might be complex due to JSON fields in DB needing parsing
+function mapPartnerRowToFormValues(dbRow: PartnerRow): PartnerFormValues {
+  // Basic mapping, assuming mapDbToPartner exists and handles JSON parsing
+  const partnerType = mapDbToPartner(dbRow); // Use the central mapper
+
+  // Ensure all required fields for the form schema are present, providing defaults if necessary
+  // This depends heavily on the exact implementation of mapDbToPartner and the schema
+  return {
+    ...partnerType,
+    // Ensure nested objects exist for the form, even if parts are null/undefined from DB
+    images: partnerType.images ?? { main: dbRow.image || '' }, // Fallback for main image if needed
+    description: partnerType.description ?? { short: dbRow.short_description || '', long: dbRow.long_description || '' },
+    location: partnerType.location ?? { address: dbRow.location || '', coordinates: { latitude: dbRow.latitude || 0, longitude: dbRow.longitude || 0 } },
+    contact: partnerType.contact ?? { phone: '', email: dbRow.email || '', website: dbRow.website || '' },
+    hours: partnerType.hours ?? { regularHours: typeof dbRow.open_hours === 'string' ? dbRow.open_hours : JSON.stringify(dbRow.open_hours) || '' }, // Handle potential JSON open_hours
+    rating: partnerType.rating ?? { score: 0, reviewCount: 0}, // Default rating object
+    prices: partnerType.prices ?? { priceRange: dbRow.price_range || 'Varies' }, // Default price object
+    promotion: partnerType.promotion ?? { isSponsored: dbRow.is_sponsored ?? false, promotionEndsAt: dbRow.sponsor_end_date || undefined },
+    // Add other defaults as required by the Zod schema
+  };
+}
 
 interface PartnerEditFormProps {
   initialPartnerData: PartnerRow;
@@ -55,45 +141,20 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
   const router = useRouter()
   const { toast } = useToast()
   
-  // Initialize form with default values from partner data
-  const form = useForm<FormValues>({
+  // Initialize form using the mapped data
+  const form = useForm<PartnerFormValues>({
     resolver: zodResolver(partnerSchema),
-    defaultValues: {
-      name: initialPartnerData.name,
-      category: initialPartnerData.category,
-      image: initialPartnerData.image,
-      short_description: initialPartnerData.short_description,
-      location: initialPartnerData.location,
-      price_range: initialPartnerData.price_range,
-      open_hours: initialPartnerData.open_hours,
-      contact: initialPartnerData.contact,
-      latitude: typeof initialPartnerData.coordinates === 'object' ? 
-               (initialPartnerData.coordinates as any)?.latitude || 0 : 0,
-      longitude: typeof initialPartnerData.coordinates === 'object' ? 
-               (initialPartnerData.coordinates as any)?.longitude || 0 : 0,
-      is_sponsored: initialPartnerData.is_sponsored || false,
-      long_description: initialPartnerData.long_description,
-      email: initialPartnerData.email || '',
-      website: initialPartnerData.website || '',
-    },
+    // Map initial DB data to the nested PartnerType structure for the form
+    defaultValues: mapPartnerRowToFormValues(initialPartnerData),
   });
 
   // Function to handle form submission
-  async function handleFormSubmit(values: FormValues) {
+  async function handleFormSubmit(values: PartnerFormValues) {
     setIsSubmitting(true)
     try {
-      // Prepare data for update
-      const partnerData = {
-        ...values,
-        coordinates: {
-          latitude: values.latitude,
-          longitude: values.longitude,
-        },
-        category: values.category as PartnerCategory,
-      };
-
-      // Update partner
-      const result = await updatePartnerAction(partnerId, partnerData);
+      // The Zod schema should now infer types closer to Partial<Partner>
+      // Pass values directly, assuming mapPartnerToDb handles conversion inside the action if needed
+      const result = await updatePartnerAction(partnerId, values);
       
       if (result.success) {
         toast({
@@ -116,22 +177,33 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
     }
   }
 
-  // Partner category options based on your partner.ts file
-  const categoryOptions = [
-    { value: "location-scooter", label: "Scooter Rental" },
-    { value: "location-voiture", label: "Car Rental" },
-    { value: "location-bateau", label: "Boat Rental" },
-    { value: "location-velo", label: "Bike Rental" },
-    { value: "hebergement-appartement", label: "Apartment" },
-    { value: "hebergement-bungalow", label: "Bungalow" },
-    { value: "hebergement-villa", label: "Villa" },
-    { value: "hebergement-guesthouse", label: "Guesthouse" },
-    { value: "restaurant", label: "Restaurant" },
-    { value: "cafe", label: "Café" },
-    { value: "bar", label: "Bar" },
-    { value: "street-food", label: "Street Food" },
-    // Add all other categories from partner.ts
+  // Partner category options - dynamically generate based on enums
+   const establishmentCategories = Object.entries(EstablishmentCategory).map(([key, value]) => ({
+    label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Format label
+    value: value,
+  }));
+
+  const serviceCategories = Object.entries(ServiceCategory).map(([key, value]) => ({
+    label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Format label
+    value: value,
+  }));
+
+  const subcategoryOptions = Object.entries(PartnerSubcategory).map(([key, value]) => ({
+      label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      value: value,
+  }));
+
+  const priceIndicatorOptions: { value: PriceIndicator, label: string }[] = [
+    { value: "Free", label: "Free" },
+    { value: "Varies", label: "Varies" },
+    { value: "€", label: "€ (Budget)" },
+    { value: "€€", label: "€€ (Mid-range)" },
+    { value: "€€€", label: "€€€ (High-end)" },
+    { value: "€€€€", label: "€€€€ (Luxury)" },
   ];
+
+  // Watch the section to dynamically show main category options
+  const selectedSection = form.watch("section");
 
   return (
     <Form {...form}>
@@ -165,18 +237,32 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="section"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>Section</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select a section" /></SelectTrigger></FormControl>
                         <SelectContent>
-                          {categoryOptions.map(option => (
+                          {Object.entries(PartnerSection).map(([key, value]) => (
+                            <SelectItem key={value} value={value}>{key}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="mainCategory"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Main Category</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!selectedSection}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select a main category" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {(selectedSection === PartnerSection.ESTABLISHMENT ? establishmentCategories : serviceCategories).map(option => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -189,10 +275,30 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="image"
+                  name="subcategory"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Image (URL)</FormLabel>
+                      <FormLabel>Subcategory</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select a subcategory" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {subcategoryOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="images.main"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Main Image (URL)</FormLabel>
                       <FormControl>
                         <Input placeholder="https://example.com/image.jpg" {...field} />
                       </FormControl>
@@ -202,9 +308,9 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="short_description"
+                  name="description.short"
                   render={({ field }) => (
-                    <FormItem>
+                     <FormItem>
                       <FormLabel>Short Description</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Short description of the partner" {...field} />
@@ -215,21 +321,16 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="price_range"
+                  name="prices.priceRange"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Price Range</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a price range" />
-                          </SelectTrigger>
-                        </FormControl>
+                         <FormControl><SelectTrigger><SelectValue placeholder="Select a price range" /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value="$">$ (Budget)</SelectItem>
-                          <SelectItem value="$$">$$ (Mid-range)</SelectItem>
-                          <SelectItem value="$$$">$$$ (High-end)</SelectItem>
-                          <SelectItem value="$$$$">$$$$ (Luxury)</SelectItem>
+                           {priceIndicatorOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -241,15 +342,15 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
           </TabsContent>
 
           <TabsContent value="details" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
-                <CardDescription>Detailed information about the partner</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
+             <Card>
+               <CardHeader>
+                 <CardTitle>Details</CardTitle>
+                 <CardDescription>Detailed information about the partner</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <FormField
                   control={form.control}
-                  name="long_description"
+                  name="description.long"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Long Description</FormLabel>
@@ -262,10 +363,10 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="contact"
+                  name="contact.phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Contact</FormLabel>
+                      <FormLabel>Contact Phone</FormLabel>
                       <FormControl>
                         <Input placeholder="+66 123 456 789" {...field} />
                       </FormControl>
@@ -275,20 +376,21 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="open_hours"
+                  name="hours.regularHours"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Opening Hours</FormLabel>
+                      <FormLabel>Opening Hours (Text)</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: 9:00 AM - 6:00 PM" {...field} />
+                        <Input placeholder="Ex: Mon-Fri 9am-6pm, Sat 10am-4pm" {...field} />
                       </FormControl>
+                       <FormDescription>Describe opening hours textually.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="contact.email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Email</FormLabel>
@@ -301,7 +403,7 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 />
                 <FormField
                   control={form.control}
-                  name="website"
+                  name="contact.website"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>URL du site web</FormLabel>
@@ -320,15 +422,15 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
           </TabsContent>
 
           <TabsContent value="location" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Location</CardTitle>
-                <CardDescription>Information about the partners location</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
+             <Card>
+               <CardHeader>
+                 <CardTitle>Location</CardTitle>
+                 <CardDescription>Information about the partners location</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                 <FormField
                   control={form.control}
-                  name="location"
+                  name="location.address"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Address</FormLabel>
@@ -342,16 +444,17 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="latitude"
+                    name="location.coordinates.latitude"
                     render={({ field }) => (
-                      <FormItem>
+                       <FormItem>
                         <FormLabel>Latitude</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.000001" 
-                            {...field} 
-                            onChange={e => field.onChange(parseFloat(e.target.value))} 
+                          <Input
+                            type="number"
+                            step="any"
+                            {...field}
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                            value={field.value ?? ''}
                           />
                         </FormControl>
                         <FormMessage />
@@ -360,16 +463,17 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                   />
                   <FormField
                     control={form.control}
-                    name="longitude"
+                    name="location.coordinates.longitude"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Longitude</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.000001" 
-                            {...field} 
-                            onChange={e => field.onChange(parseFloat(e.target.value))} 
+                           <Input
+                            type="number"
+                            step="any"
+                            {...field}
+                            onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                             value={field.value ?? ''}
                           />
                         </FormControl>
                         <FormMessage />
@@ -377,6 +481,20 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
                     )}
                   />
                 </div>
+                <FormField
+                  control={form.control}
+                  name="location.area"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Area</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., West Coast, Srithanu" {...field} />
+                      </FormControl>
+                      <FormDescription>Specify the general area on the island.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -392,3 +510,25 @@ export function PartnerEditForm({ initialPartnerData, partnerId }: PartnerEditFo
     </Form>
   )
 }
+
+// Helper function to get category label (replace the old one)
+const getCategoryLabel = (mainCategoryValue?: string | null, subcategoryValue?: string | null): string => {
+  if (!mainCategoryValue && !subcategoryValue) return "Unknown";
+
+  const findLabel = (enumObj: any, value: string | null | undefined): string | undefined => {
+      if (!value) return undefined;
+      const entry = Object.entries(enumObj).find(([_, val]) => val === value);
+      return entry ? entry[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : undefined;
+  };
+
+  const subLabel = findLabel(PartnerSubcategory, subcategoryValue);
+  if (subLabel) return subLabel; // Prefer subcategory label if specific
+
+  const mainLabelEst = findLabel(EstablishmentCategory, mainCategoryValue);
+  if (mainLabelEst) return mainLabelEst;
+
+  const mainLabelSvc = findLabel(ServiceCategory, mainCategoryValue);
+  if (mainLabelSvc) return mainLabelSvc;
+
+  return subcategoryValue || mainCategoryValue || "Unknown"; // Fallback to raw value
+};

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getGuides } from "@/db/cached-queries"
 import { formatDate } from "@/lib/utils"
-import { GuideType } from "@/types/guide"
+import { Guide, getCategoryDisplayName } from "@/types/newGuide"
 
 // Component to handle client-side actions like delete confirmation
 // You might need a separate client component for this if using delete
@@ -40,11 +40,11 @@ export default async function GuidesPage() {
       </TableCell>
     </TableRow>
   ) : (
-    guides.map((guide: any) => ( // Replace 'any' with your actual Guide DB type when available
+    guides.map((guide: Guide) => (
       <TableRow key={guide.id}>
-        <TableCell className="font-medium">{guide.title}</TableCell>
-        <TableCell>{guide.category}</TableCell>
-        <TableCell>{guide.location || 'N/A'}</TableCell>
+        <TableCell className="font-medium">{guide.name}</TableCell>
+        <TableCell>{getCategoryDisplayName(guide.category)}</TableCell>
+        <TableCell>{guide.location?.address || 'N/A'}</TableCell>
         <TableCell>
           <div className="flex flex-wrap gap-1">
             {Array.isArray(guide.tags) && guide.tags.length > 0 ? (
@@ -56,7 +56,7 @@ export default async function GuidesPage() {
             )}
           </div>
         </TableCell>
-        <TableCell>{formatDate(guide.lastUpdatedAt || guide.created_at)}</TableCell>
+        <TableCell>{formatDate(guide.lastUpdatedAt || guide.createdAt)}</TableCell>
         <TableCell className="text-right space-x-2">
           {/* View link (example) */}
           {/* <Link href={`/guides/${guide.slug || guide.id}`} passHref>

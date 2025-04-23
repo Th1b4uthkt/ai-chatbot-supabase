@@ -8,7 +8,7 @@ import { createPartnerQuery, updatePartnerQuery, deletePartnerQuery } from '@/db
 import { mapPartnerToDb } from '@/lib/supabase/mappers';
 import { createClient } from '@/lib/supabase/server'; // Use server client
 import { TablesInsert, TablesUpdate } from '@/lib/supabase/types';
-import { PartnerType } from '@/types/partner';
+import { PartnerType } from '@/types/partner/partner';
 
 export async function createPartnerAction(partner: PartnerType) {
   const supabase = await createClient();

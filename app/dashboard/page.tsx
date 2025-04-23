@@ -32,7 +32,7 @@ async function getData() {
   // Count sponsored items - handle nulls properly
   const sponsoredEvents = events.filter(event => event.is_sponsored === true).length;
   const sponsoredPartners = partners.filter(partner => partner.is_sponsored === true).length;
-  const featuredGuides = guides.filter(guide => guide.is_featured === true).length;
+  const featuredGuides = guides.filter(guide => guide.isFeatured === true).length;
   
   // Process event categories using regular objects instead of Map to avoid TypeScript issues
   const eventCategories: Record<string, number> = {};
@@ -45,8 +45,9 @@ async function getData() {
   // Process partner categories
   const partnerCategories: Record<string, number> = {};
   partners.forEach(partner => {
-    if (!partner.category) return;
-    const category = partner.category;
+    // Use main_category from the fetched database row
+    if (!partner.main_category) return; 
+    const category = partner.main_category; // Use main_category (snake_case from DB)
     partnerCategories[category] = (partnerCategories[category] || 0) + 1;
   });
   
@@ -175,8 +176,8 @@ export default async function DashboardPage() {
             </Card>
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="lg:col-span-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>Event Categories</CardTitle>
                 <CardDescription>
@@ -211,7 +212,7 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
             
-            <Card className="lg:col-span-3">
+            <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>Partner Categories</CardTitle>
                 <CardDescription>
@@ -240,6 +241,41 @@ export default async function DashboardPage() {
                   ) : (
                     <div className="text-sm text-muted-foreground py-4">
                       No partner categories data available
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Guide Categories</CardTitle>
+                <CardDescription>
+                  Top guide categories
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {data.guideCategories.length > 0 ? (
+                    data.guideCategories.map((item) => (
+                      <div className="flex items-center" key={item.category}>
+                        <div className="w-1/2 font-medium truncate">{item.category}</div>
+                        <div className="w-full">
+                          <div className="flex h-2 items-center space-x-2">
+                            <div 
+                              className="h-2 bg-primary" 
+                              style={{ width: `${(item.count / data.totalGuides) * 100}%` }}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {item.count}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-muted-foreground py-4">
+                      No guide categories data available
                     </div>
                   )}
                 </div>

@@ -4,37 +4,43 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getPartners } from "@/db/cached-queries"
+import { mapDbToPartner } from "@/lib/supabase/mappers"
+import { Tables } from "@/lib/supabase/types"
 import { formatDate } from "@/lib/utils"
+import { EstablishmentCategory, PartnerSection, PartnerSubcategory, ServiceCategory, Partner } from "@/types/partner/partner"
 
 import { SponsorControl } from "../components/SponsorControl"
 
-export default async function PartnersPage() {
-  // Fetch partners from Supabase
-  const partners = await getPartners()
+type PartnerRow = Tables<'partners'>;
 
-  // Map categories to more user-friendly names
-  const getCategoryLabel = (category: string) => {
-    const categoryMap: Record<string, string> = {
-      'location-scooter': 'Scooter Rental',
-      'location-voiture': 'Car Rental',
-      'location-bateau': 'Boat Rental',
-      'location-velo': 'Bike Rental',
-      'hebergement-appartement': 'Apartment',
-      'hebergement-bungalow': 'Bungalow',
-      'hebergement-villa': 'Villa',
-      'hebergement-guesthouse': 'Guesthouse',
-      'restaurant': 'Restaurant',
-      'cafe': 'Café',
-      'bar': 'Bar',
-      'street-food': 'Street Food',
-      // Add more mappings as needed
-    }
-    return categoryMap[category] || category
-  }
+const getCategoryLabel = (mainCategoryValue?: string | null, subcategoryValue?: string | null): string => {
+  if (!mainCategoryValue && !subcategoryValue) return "Unknown";
+
+  const findLabel = (enumObj: any, value: string | null | undefined): string | undefined => {
+      if (!value) return undefined;
+      const entry = Object.entries(enumObj).find(([_, val]) => val === value);
+      return entry ? entry[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : undefined;
+  };
+
+  const subLabel = findLabel(PartnerSubcategory, subcategoryValue);
+  if (subLabel && subLabel.toLowerCase() !== 'other') return subLabel;
+
+  const mainLabelEst = findLabel(EstablishmentCategory, mainCategoryValue);
+  if (mainLabelEst) return mainLabelEst;
+
+  const mainLabelSvc = findLabel(ServiceCategory, mainCategoryValue);
+  if (mainLabelSvc) return mainLabelSvc;
+
+  return mainLabelEst || mainLabelSvc || subLabel || subcategoryValue || mainCategoryValue || "Unknown";
+};
+
+export default async function PartnersPage() {
+  const partnersData: PartnerRow[] = await getPartners()
+
+  const partners: Partner[] = partnersData.map(mapDbToPartner);
 
   return (
     <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
@@ -76,7 +82,7 @@ export default async function PartnersPage() {
                 <TableRow>
                   <TableHead className="font-medium">Name</TableHead>
                   <TableHead className="font-medium">Category</TableHead>
-                  <TableHead className="font-medium">Location</TableHead>
+                  <TableHead className="font-medium">Location Address</TableHead>
                   <TableHead className="font-medium">Rating</TableHead>
                   <TableHead><CheckSquare className="inline-block mr-1 size-4" />Sponsored</TableHead>
                   <TableHead className="text-right font-medium">Actions</TableHead>
@@ -95,23 +101,31 @@ export default async function PartnersPage() {
                       <TableCell className="font-medium">{partner.name}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="bg-muted/40 hover:bg-muted/60 text-foreground">
-                          {getCategoryLabel(partner.category)}
+                          {getCategoryLabel(partner.mainCategory, partner.subcategory)}
                         </Badge>
                       </TableCell>
-                      <TableCell>{partner.location}</TableCell>
+                      <TableCell>{partner.location.address ?? 'N/A'}</TableCell>
                       <TableCell>
                         <div className="flex items-center">
-                          <div className="text-yellow-500 mr-1">★</div>
-                          <span>{partner.rating}/5</span>
-                          <span className="text-muted-foreground ml-1 text-xs">({partner.reviews})</span>
+                          {partner.rating?.score !== undefined ? (
+                            <>
+                              <div className="text-yellow-500 mr-1">★</div>
+                              <span>{partner.rating.score.toFixed(1)}/5</span>
+                              {(partner.rating.reviewCount ?? 0) > 0 && (
+                                <span className="text-muted-foreground ml-1 text-xs">({partner.rating.reviewCount})</span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">N/A</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <SponsorControl
                           itemId={partner.id}
                           itemType="partner"
-                          initialIsSponsored={!!partner.is_sponsored}
-                          initialSponsorEndDate={partner.sponsor_end_date || null}
+                          initialIsSponsored={partner.promotion?.isSponsored ?? false}
+                          initialSponsorEndDate={partner.promotion?.promotionEndsAt ?? null}
                         />
                       </TableCell>
                       <TableCell className="text-right">

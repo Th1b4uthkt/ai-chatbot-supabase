@@ -1,5 +1,6 @@
-import { AuthError } from '@supabase/supabase-js';
-import type { Client, Database } from '../lib/supabase/types';
+import { AuthError, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../lib/supabase/types';
+import { Guide, GuideCategory } from '@/types/newGuide';
 
 // Define the database tables type
 type Tables = Database['public']['Tables'];
@@ -17,7 +18,7 @@ export function handleSupabaseError(error: any) {
 }
 
 // Session and User queries
-export async function getSessionQuery(client: Client) {
+export async function getSessionQuery(client: SupabaseClient<Database>) {
   const {
     data: { user },
     error,
@@ -33,7 +34,7 @@ export async function getSessionQuery(client: Client) {
   return user;
 }
 
-export async function getUserByIdQuery(client: Client, id: string) {
+export async function getUserByIdQuery(client: SupabaseClient<Database>, id: string) {
   const { data: user, error } = await client
     .from('users')
     .select()
@@ -48,7 +49,7 @@ export async function getUserByIdQuery(client: Client, id: string) {
   return user;
 }
 
-export async function getUserQuery(client: Client, email: string) {
+export async function getUserQuery(client: SupabaseClient<Database>, email: string) {
   const { data: users, error } = await client
     .from('users')
     .select()
@@ -59,7 +60,7 @@ export async function getUserQuery(client: Client, email: string) {
   return users;
 }
 
-export async function getUsersCountQuery(client: Client) {
+export async function getUsersCountQuery(client: SupabaseClient<Database>) {
   try {
     // Hardcode the total users count for now since we know there are 3 users
     // In a production environment, you would implement proper user counting logic
@@ -81,7 +82,7 @@ export async function getUsersCountQuery(client: Client) {
 
 // Chat queries
 export async function saveChatQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   {
     id,
     userId,
@@ -102,7 +103,7 @@ export async function saveChatQuery(
 }
 
 export async function getChatsByUserIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ) {
   const { data: chats, error } = await client
@@ -115,7 +116,7 @@ export async function getChatsByUserIdQuery(
   return chats;
 }
 
-export async function getChatByIdQuery(client: Client, { id }: { id: string }) {
+export async function getChatByIdQuery(client: SupabaseClient<Database>, { id }: { id: string }) {
   const { data: chat, error } = await client
     .from('chats')
     .select()
@@ -133,7 +134,7 @@ export async function getChatByIdQuery(client: Client, { id }: { id: string }) {
 
 // Message queries
 export async function getMessagesByChatIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ) {
   const { data: messages, error } = await client
@@ -147,7 +148,7 @@ export async function getMessagesByChatIdQuery(
 }
 
 export async function saveMessagesQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   {
     chatId,
     messages,
@@ -168,7 +169,7 @@ export async function saveMessagesQuery(
 
 // Vote queries
 export async function voteMessageQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   {
     chatId,
     messageId,
@@ -205,7 +206,7 @@ export async function voteMessageQuery(
 }
 
 export async function getVotesByChatIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ) {
   const { data: votes, error } = await client
@@ -219,7 +220,7 @@ export async function getVotesByChatIdQuery(
 
 // Document queries
 export async function getDocumentByIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ): Promise<Tables['documents']['Row'] | null> {
   const { data: documents, error } = await client
@@ -234,7 +235,7 @@ export async function getDocumentByIdQuery(
 }
 
 export async function saveDocumentQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   {
     id,
     title,
@@ -259,7 +260,7 @@ export async function saveDocumentQuery(
 
 // Suggestion queries
 export async function getSuggestionsByDocumentIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { documentId }: { documentId: string }
 ) {
   const { data: suggestions, error } = await client
@@ -272,7 +273,7 @@ export async function getSuggestionsByDocumentIdQuery(
 }
 
 export async function saveSuggestionsQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   {
     documentId,
     documentCreatedAt,
@@ -302,7 +303,7 @@ export async function saveSuggestionsQuery(
 }
 
 export async function deleteDocumentsByIdAfterTimestampQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id, timestamp }: { id: string; timestamp: string }
 ) {
   const { error } = await client
@@ -315,7 +316,7 @@ export async function deleteDocumentsByIdAfterTimestampQuery(
 }
 
 export async function getDocumentsByIdQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ) {
   const { data: documents, error } = await client
@@ -330,7 +331,7 @@ export async function getDocumentsByIdQuery(
 
 // Combined queries
 export async function getChatWithMessagesQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   { id }: { id: string }
 ) {
   const { data: chat, error: chatError } = await client
@@ -361,7 +362,7 @@ export async function getChatWithMessagesQuery(
 }
 
 // Profile queries
-export async function getUserProfileQuery(client: Client, userId: string) {
+export async function getUserProfileQuery(client: SupabaseClient<Database>, userId: string) {
   const { data: profile, error } = await client
     .from('profiles')
     .select('*')
@@ -376,7 +377,7 @@ export async function getUserProfileQuery(client: Client, userId: string) {
   return profile;
 }
 
-export async function isUserAdminQuery(client: Client, userId: string) {
+export async function isUserAdminQuery(client: SupabaseClient<Database>, userId: string) {
   const { data: profile, error } = await client
     .from('profiles')
     .select('is_admin')
@@ -394,7 +395,7 @@ export async function isUserAdminQuery(client: Client, userId: string) {
 }
 
 // Event queries
-export async function getEventsQuery(client: Client) {
+export async function getEventsQuery(client: SupabaseClient<Database>) {
   const { data, error } = await client
     .from('events')
     .select('*')
@@ -408,7 +409,7 @@ export async function getEventsQuery(client: Client) {
   return data;
 }
 
-export async function getEventByIdQuery(client: Client, id: string) {
+export async function getEventByIdQuery(client: SupabaseClient<Database>, id: string) {
   const { data, error } = await client
     .from('events')
     .select('*')
@@ -424,7 +425,7 @@ export async function getEventByIdQuery(client: Client, id: string) {
 }
 
 export async function createEventQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   eventData: Tables['events']['Insert']
 ) {
   const { data, error } = await client
@@ -442,7 +443,7 @@ export async function createEventQuery(
 }
 
 export async function updateEventQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   id: string,
   eventData: Tables['events']['Update']
 ) {
@@ -461,7 +462,7 @@ export async function updateEventQuery(
   return data;
 }
 
-export async function deleteEventQuery(client: Client, id: string) {
+export async function deleteEventQuery(client: SupabaseClient<Database>, id: string) {
   const { error } = await client
     .from('events')
     .delete()
@@ -475,8 +476,8 @@ export async function deleteEventQuery(client: Client, id: string) {
   return true;
 }
 
-// Guide queries
-export async function getGuidesQuery(client: Client) {
+// Updated guide queries with proper typing 
+export async function getGuidesQuery(client: SupabaseClient<Database>) {
   const { data, error } = await client
     .from('guides')
     .select('*')
@@ -487,10 +488,11 @@ export async function getGuidesQuery(client: Client) {
     return [];
   }
 
-  return data as any[];
+  // Map the database row to the Guide type if needed
+  return data as unknown as Guide[];
 }
 
-export async function getGuideByIdQuery(client: Client, id: string) {
+export async function getGuideByIdQuery(client: SupabaseClient<Database>, id: string) {
   const { data, error } = await client
     .from('guides')
     .select('*')
@@ -502,17 +504,19 @@ export async function getGuideByIdQuery(client: Client, id: string) {
     return null;
   }
 
-  return data as any;
+  // Map the database row to the Guide type if needed
+  return data as unknown as Guide | null;
 }
 
+// Use TablesInsert for creating guides - but define a mapper function for the Guide type
 export async function createGuideQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   guideData: Tables['guides']['Insert']
 ) {
   const { data, error } = await client
     .from('guides')
     .insert(guideData)
-    .select('id')
+    .select()
     .single();
 
   if (error) {
@@ -523,8 +527,9 @@ export async function createGuideQuery(
   return data?.id;
 }
 
+// Use TablesUpdate for updating guides - but define a mapper function for the Guide type
 export async function updateGuideQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   id: string,
   guideData: Tables['guides']['Update']
 ) {
@@ -541,7 +546,7 @@ export async function updateGuideQuery(
   return true;
 }
 
-export async function deleteGuideQuery(client: Client, id: string) {
+export async function deleteGuideQuery(client: SupabaseClient<Database>, id: string) {
   const { error } = await client
     .from('guides')
     .delete()
@@ -555,22 +560,27 @@ export async function deleteGuideQuery(client: Client, id: string) {
   return true;
 }
 
-// Partner queries
-export async function getPartnersQuery(client: Client) {
+// Partner queries - REMOVING OLD IMPLEMENTATIONS AND REWRITING
+
+// Fetches all partners. Assumes Supabase returns data compatible with PartnerType,
+// potentially using JSONB columns for nested structures.
+export async function getPartnersQuery(client: SupabaseClient<Database>): Promise<Tables['partners']['Row'][]> {
   const { data, error } = await client
     .from('partners')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('name', { ascending: true }); // Order by name for consistency
 
   if (error) {
     handleSupabaseError(error);
-    return [];
+    return []; // Return empty array on error
   }
 
-  return data;
+  // Assuming the Row type from Supabase is compatible enough or will be mapped later
+  return data || [];
 }
 
-export async function getPartnerByIdQuery(client: Client, id: string) {
+// Fetches a single partner by ID.
+export async function getPartnerByIdQuery(client: SupabaseClient<Database>, id: string): Promise<Tables['partners']['Row'] | null> {
   const { data, error } = await client
     .from('partners')
     .select('*')
@@ -578,32 +588,41 @@ export async function getPartnerByIdQuery(client: Client, id: string) {
     .single();
 
   if (error) {
-    handleSupabaseError(error);
-    return null;
+    // Handle not found ('PGRST116') gracefully, throw others
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    handleSupabaseError(error); // Log other errors
+    return null; // Return null on other errors too for simplicity here
   }
 
   return data;
 }
 
-export async function getPartnersByCategoryQuery(client: Client, category: string) {
+// Fetches partners by category. Assumes 'category' column exists and is queryable.
+export async function getPartnersByCategoryQuery(client: SupabaseClient<Database>, category: string): Promise<Tables['partners']['Row'][]> {
   const { data, error } = await client
     .from('partners')
     .select('*')
-    .eq('category', category)
-    .order('created_at', { ascending: false });
+    .eq('category', category) // Ensure 'category' field in DB aligns with PartnerSubcategory or similar concept
+    .order('name', { ascending: true });
 
   if (error) {
     handleSupabaseError(error);
     return [];
   }
 
-  return data;
+  return data || [];
 }
 
+// Creates a new partner. Expects data mapped to the DB schema (TablesInsert<'partners'>).
 export async function createPartnerQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   partnerData: Tables['partners']['Insert']
-) {
+): Promise<Tables['partners']['Row'] | null> {
+  // Ensure essential fields are present if needed by DB constraints (handled by mapper/validation before calling)
+  // Example: Ensure 'category' or other non-nullable fields are set.
+  
   const { data, error } = await client
     .from('partners')
     .insert(partnerData)
@@ -611,6 +630,7 @@ export async function createPartnerQuery(
     .single();
 
   if (error) {
+    console.error("Supabase create partner error:", error); // More detailed logging
     handleSupabaseError(error);
     return null;
   }
@@ -618,19 +638,27 @@ export async function createPartnerQuery(
   return data;
 }
 
+// Updates an existing partner. Expects data mapped to the DB schema (TablesUpdate<'partners'>).
 export async function updatePartnerQuery(
-  client: Client,
+  client: SupabaseClient<Database>,
   id: string,
   partnerData: Tables['partners']['Update']
-) {
+): Promise<Tables['partners']['Row'] | null> {
+  // Remove 'id' from update data if present, as it's used in eq()
+  const updatePayload = { ...partnerData };
+  delete updatePayload.id; 
+  // Ensure coordinates are handled correctly if they are a specific PostGIS type or nested JSON
+  // This might need specific handling in the mapper function before calling this query.
+
   const { data, error } = await client
     .from('partners')
-    .update(partnerData)
+    .update(updatePayload)
     .eq('id', id)
     .select()
     .single();
 
   if (error) {
+    console.error(`Supabase update partner error (ID: ${id}):`, error); // More detailed logging
     handleSupabaseError(error);
     return null;
   }
@@ -638,16 +666,18 @@ export async function updatePartnerQuery(
   return data;
 }
 
-export async function deletePartnerQuery(client: Client, id: string) {
+// Deletes a partner by ID.
+export async function deletePartnerQuery(client: SupabaseClient<Database>, id: string): Promise<boolean> {
   const { error } = await client
     .from('partners')
     .delete()
     .eq('id', id);
 
   if (error) {
+    console.error(`Supabase delete partner error (ID: ${id}):`, error); // More detailed logging
     handleSupabaseError(error);
     return false;
   }
 
-  return true;
+  return true; // Return true on successful deletion (or no error)
 }

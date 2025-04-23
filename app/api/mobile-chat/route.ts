@@ -13,7 +13,7 @@ import { models } from '@/ai/models';
 import { systemPrompt } from '@/ai/prompts';
 import { corsHeaders } from '@/app/api/cors-middleware';
 import { validateToken } from '@/lib/supabase/server';
-import { MessageRole } from '@/lib/supabase/types';
+import { MessageRole } from '@/lib/types';
 import {
   generateUUID,
   getMostRecentUserMessage,

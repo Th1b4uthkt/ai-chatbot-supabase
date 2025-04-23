@@ -5,7 +5,12 @@ import {
   PostgrestError,
   type Client,
   type Message,
+  type Database,
+  type Json,
 } from '@/lib/supabase/types';
+
+// Alias pour TablesInsert pour plus de clarté
+type MessagesInsert = Database['public']['Tables']['messages']['Insert'];
 
 const getSupabase = async () => createClient();
 
@@ -76,38 +81,52 @@ export async function saveMessages({
 }) {
   await mutateQuery(
     async (client, { chatId, messages }) => {
-      const formattedMessages = messages.map((message) => {
-        // Handle tool invocations and content
-        let content = message.content;
+      // Mapper les objets Message (entrée) vers MessagesInsert (DB)
+      const formattedMessages: MessagesInsert[] = messages.map((message) => {
+        let dbContent: Json; // Le contenu pour la DB doit être de type Json
 
-        // If message has tool invocations, save them as part of the content
-        if (message?.toolInvocations && message?.toolInvocations?.length > 0) {
-          content = JSON.stringify({
-            content: message.content,
-            toolInvocations: message.toolInvocations,
-          });
-        } else if (typeof content === 'object') {
-          content = JSON.stringify(content);
+        // Logique inspirée de convertToDBMessage pour sérialiser
+        const hasComplexData = 
+          (message.toolInvocations && message.toolInvocations.length > 0) ||
+          (message.annotations && message.annotations.length > 0);
+
+        if (hasComplexData || typeof message.content === 'object') {
+          // Si toolInvocations, annotations, ou si content est déjà un objet,
+          // créer un objet conteneur et le sérialiser en chaîne JSON.
+          const messageData: any = {};
+          // S'assurer que message.content n'est pas null/undefined avant de l'ajouter
+          if (message.content !== null && message.content !== undefined) {
+             messageData.content = message.content;
+          }
+          if (message.toolInvocations && message.toolInvocations.length > 0) {
+            messageData.toolInvocations = message.toolInvocations;
+          }
+          if (message.annotations && message.annotations.length > 0) {
+            messageData.annotations = message.annotations;
+          }
+          dbContent = JSON.stringify(messageData);
+        } else {
+          // Si content est une simple string (ou autre primitif JSON valide)
+          dbContent = message.content as string; // Assumer string ici, ajuster si nécessaire
         }
 
-        // Handle annotations if present
-        if (message.annotations && message.annotations?.length > 0) {
-          content = JSON.stringify({
-            content: content,
-            annotations: message.annotations,
-          });
-        }
-
-        return {
+        // Construire l'objet pour l'insertion, conforme à MessagesInsert
+        const messageToInsert: MessagesInsert = {
           id: message.id,
           chat_id: chatId,
-          role: message.role,
-          content: content,
+          role: message.role, // Assumer message.role est compatible
+          content: dbContent, // Contenu traité (sérialisé si nécessaire)
+          // Utiliser created_at du message si fourni, sinon générer
           created_at: message.created_at || new Date().toISOString(),
         };
+        // updated_at sera géré par la DB ou triggers si configuré
+
+        return messageToInsert;
       });
 
       const { error } = await client.from('messages').insert(formattedMessages);
+
+      // Gérer l'erreur DANS mutateQuery via handleDatabaseError
       if (error) throw error;
     },
     [{ chatId, messages }],

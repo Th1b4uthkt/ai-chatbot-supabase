@@ -1,204 +1,190 @@
 /**
  * Utility functions to map between our Partner types and the database schema
  */
-import { Partner, PartnerType } from '@/types/partner';
+import {
+  PartnerType,
+  PartnerSection,
+  EstablishmentCategory,
+  ServiceCategory,
+  PartnerSubcategory,
+  PriceIndicator
+} from '@/types/partner/partner'; // Adjust path if needed
 
-import { Partner as SupabasePartner } from './types';
+import { Tables, TablesInsert, TablesUpdate } from './types'; // Use generated DB types
 
-/**
- * Maps a partner from our application model to the database schema
- */
-export function mapPartnerToDb(partner: PartnerType): Partial<SupabasePartner> {
-  // Base fields common to all partner types
-  const baseFields = {
-    id: partner.id,
-    name: partner.name,
-    category: partner.category,
-    image: partner.image,
-    short_description: partner.shortDescription,
-    location: partner.location,
-    rating: partner.rating,
-    reviews: partner.reviews,
-    price_range: partner.priceRange,
-    features: partner.features,
-    open_hours: partner.openHours,
-    contact: partner.contact,
-    coordinates: partner.coordinates,
-    gallery: partner.gallery,
-    long_description: partner.longDescription,
-    is_sponsored: partner.is_sponsored,
-    sponsor_end_date: partner.sponsor_end_date,
-    website: partner.website,
-    email: partner.email,
-    social: partner.social,
-    tags: partner.tags,
-    availability: partner.availability,
-    accessibility: partner.accessibility,
-    payment_options: partner.paymentOptions,
-    languages: partner.languages,
-    discounts: partner.discounts,
-    services: partner.services,
-    customer_reviews: partner.customerReviews,
-    faq: partner.faq,
-    updated_at: partner.updatedAt,
-  };
-
-  // Type-specific fields
-  let typeSpecificFields = {};
-
-  // Handle Vehicle rentals
-  if (
-    partner.category === 'location-scooter' ||
-    partner.category === 'location-voiture' ||
-    partner.category === 'location-bateau' ||
-    partner.category === 'location-velo'
-  ) {
-    // As any is used for typecasting because the Partner types don't share a common interface for these fields
-    const vehiclePartner = partner as any;
-    if (vehiclePartner.rentalOptions) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        rental_options: vehiclePartner.rentalOptions,
-      };
-    }
-
-    // Add type-specific details
-    if (partner.category === 'location-scooter' && vehiclePartner.scooterDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        vehicle_details: vehiclePartner.scooterDetails,
-      };
-    } else if (partner.category === 'location-voiture' && vehiclePartner.carDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        vehicle_details: vehiclePartner.carDetails,
-      };
-    } else if (partner.category === 'location-bateau' && vehiclePartner.boatDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        vehicle_details: vehiclePartner.boatDetails,
-      };
-    } else if (partner.category === 'location-velo' && vehiclePartner.bikeDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        vehicle_details: vehiclePartner.bikeDetails,
-      };
+// Helper function for safe JSON parsing from DB (which might return objects directly for JSONB)
+function parseJsonOrObject<T>(dbValue: unknown): T | null {
+  if (dbValue === null || dbValue === undefined) return null;
+  if (typeof dbValue === 'object') return dbValue as T; // Already an object
+  if (typeof dbValue === 'string') {
+    try {
+      return JSON.parse(dbValue) as T;
+    } catch (e) {
+      console.error("Failed to parse JSON string from DB:", dbValue, e);
+      return null;
     }
   }
-
-  // Handle Accommodation
-  if (
-    partner.category === 'hebergement-appartement' ||
-    partner.category === 'hebergement-bungalow' ||
-    partner.category === 'hebergement-villa' ||
-    partner.category === 'hebergement-guesthouse'
-  ) {
-    const accommodationPartner = partner as any;
-    if (accommodationPartner.accommodationDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        accommodation_details: accommodationPartner.accommodationDetails,
-      };
-    }
-
-    // Add type-specific details
-    if (partner.category === 'hebergement-appartement' && accommodationPartner.apartmentDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        business_details: accommodationPartner.apartmentDetails,
-      };
-    } else if (partner.category === 'hebergement-bungalow' && accommodationPartner.bungalowDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        business_details: accommodationPartner.bungalowDetails,
-      };
-    } else if (partner.category === 'hebergement-villa' && accommodationPartner.villaDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        business_details: accommodationPartner.villaDetails,
-      };
-    } else if (partner.category === 'hebergement-guesthouse' && accommodationPartner.guesthouseDetails) {
-      typeSpecificFields = {
-        ...typeSpecificFields,
-        business_details: accommodationPartner.guesthouseDetails,
-      };
-    }
-  }
-
-  // Handle other business types (restaurants, bars, etc.)
-  // This is a simplified approach - in a real implementation you'd want to handle each type
-  if ((partner as any).restaurantDetails) {
-    typeSpecificFields = {
-      ...typeSpecificFields,
-      business_details: (partner as any).restaurantDetails,
-    };
-  } else if ((partner as any).cafeDetails) {
-    typeSpecificFields = {
-      ...typeSpecificFields,
-      business_details: (partner as any).cafeDetails,
-    };
-  } else if ((partner as any).barDetails) {
-    typeSpecificFields = {
-      ...typeSpecificFields,
-      business_details: (partner as any).barDetails,
-    };
-  }
-  // Add more type-specific mappings as needed
-
-  return {
-    ...baseFields,
-    ...typeSpecificFields,
-  };
+  console.warn("Unexpected type for JSON field in DB:", typeof dbValue);
+  return null;
 }
 
 /**
- * Maps a partner from the database schema to our application model
- * This is a simplified approach, in a real implementation you'd want a more robust type detection
+ * Maps the PartnerType application model to the Supabase database schema (TablesUpdate or TablesInsert).
  */
-export function mapDbToPartner(dbPartner: SupabasePartner): Partial<Partner> {
-  // Helper to safely cast complex JSON fields
-  const safeCast = <T>(val: any): T | undefined => {
-    if (val === null) return undefined;
-    return val as T;
+export function mapPartnerToDb(partner: Partial<PartnerType>): Partial<TablesUpdate<"partners">> {
+  
+  const dbData: Partial<TablesUpdate<'partners'>> = {
+    name: partner.name,
+    section: partner.section,
+    // main_category: partner.mainCategory, // Removed as it's not in TablesUpdate<'partners'>
+    subcategory: partner.subcategory,
+    tags: partner.tags,
+    features: partner.features,
+    languages: partner.languages,
+    
+    // Map nested PartnerType fields to corresponding DB columns
+    image: partner.images?.main,
+    gallery_images: partner.images?.gallery,
+    short_description: partner.description?.short,
+    long_description: partner.description?.long,
+    location: partner.location?.address,
+    latitude: partner.location?.coordinates?.latitude,
+    longitude: partner.location?.coordinates?.longitude,
+    area: partner.location?.area,
+    // Store complex objects directly if DB column is JSONB
+    contact: partner.contact as any, 
+    social: partner.contact?.social as any, // Extract social if needed by schema
+    // open_hours: partner.hours as any, // Removed as it's not in TablesUpdate<'partners'> 
+    rating: partner.rating as any,
+    accessibility: partner.accessibility as any,
+    payment_options: partner.paymentOptions as any,
+    faq: partner.faq as any,
+    attributes: partner.attributes as any,
+    
+    // Map fields that might be structured differently
+    price_range: partner.prices?.priceRange,
+    currency: partner.prices?.currency,
+    email: partner.contact?.email, // Extract from contact object
+    website: partner.contact?.website, // Extract from contact object
+    is_sponsored: partner.promotion?.isSponsored,
+    is_featured: partner.promotion?.isFeatured,
+    sponsor_end_date: partner.promotion?.promotionEndsAt ? new Date(partner.promotion.promotionEndsAt).toISOString() : null,
+
+    // updated_at is usually handled by DB trigger/default
   };
 
-  // Base fields common to all partner types
-  const baseFields = {
+  // Remove undefined fields before sending to Supabase
+  Object.keys(dbData).forEach(key => {
+    const typedKey = key as keyof typeof dbData;
+    if (dbData[typedKey] === undefined) {
+      delete dbData[typedKey];
+    }
+    // Convert null sponsor_end_date explicitly if needed by DB/query
+    if (typedKey === 'sponsor_end_date' && dbData[typedKey] === null) {
+      // Keep it null, Supabase should handle it
+    }
+  });
+
+  delete dbData.id; // ID is used in .eq() for updates, not in payload
+  // delete dbData.created_at; // Let DB handle creation timestamp
+
+  return dbData;
+}
+
+/**
+ * Maps a partner row from the Supabase database schema (Tables<'partners'>) to the PartnerType application model.
+ */
+export function mapDbToPartner(dbPartner: Tables<'partners'>): PartnerType {
+  // Define default structures for nested objects in PartnerType
+  const defaultImages = { main: '', gallery: [] };
+  const defaultDescription = { short: '', long: '' };
+  const defaultLocation = { address: '' };
+  const defaultContact = {};
+  const defaultHours = {};
+  const defaultRating = { score: 0, reviewCount: 0 };
+  const defaultPrices: { priceRange: PriceIndicator, currency?: string } = { priceRange: 'Varies' };
+  const defaultPromotion = { isSponsored: false, isFeatured: false };
+  const defaultAccessibility = {};
+  const defaultPaymentOptions = {};
+  const defaultFaq: Array<{ question: string; answer: string }> = [];
+  const defaultAttributes = undefined;
+
+  // Construct the PartnerType object by mapping DB columns
+  const partner: Partial<PartnerType> = {
     id: dbPartner.id,
-    name: dbPartner.name,
-    category: dbPartner.category as any, // Type assertion needed here
-    image: dbPartner.image,
-    shortDescription: dbPartner.short_description,
-    location: dbPartner.location,
-    rating: dbPartner.rating,
-    reviews: dbPartner.reviews,
-    priceRange: dbPartner.price_range,
-    features: dbPartner.features,
-    openHours: dbPartner.open_hours,
-    contact: dbPartner.contact,
-    coordinates: safeCast(dbPartner.coordinates),
-    gallery: dbPartner.gallery,
-    longDescription: dbPartner.long_description,
-    is_sponsored: dbPartner.is_sponsored || false,
-    sponsor_end_date: dbPartner.sponsor_end_date || undefined,
-    website: dbPartner.website || undefined,
-    email: dbPartner.email || undefined,
-    social: safeCast(dbPartner.social),
-    tags: dbPartner.tags || undefined,
-    availability: safeCast(dbPartner.availability),
-    accessibility: safeCast(dbPartner.accessibility),
-    paymentOptions: safeCast(dbPartner.payment_options),
-    languages: dbPartner.languages || undefined,
-    discounts: safeCast(dbPartner.discounts),
-    services: dbPartner.services || undefined,
-    customerReviews: safeCast(dbPartner.customer_reviews),
-    faq: safeCast(dbPartner.faq),
-    updatedAt: dbPartner.updated_at || undefined,
+    name: dbPartner.name ?? 'Unnamed Partner',
+    section: (dbPartner.section as PartnerSection) ?? PartnerSection.ESTABLISHMENT,
+    mainCategory: (dbPartner.main_category as EstablishmentCategory | ServiceCategory) ?? EstablishmentCategory.ACCOMMODATION,
+    subcategory: (dbPartner.subcategory as PartnerSubcategory) ?? PartnerSubcategory.OTHER,
+    tags: dbPartner.tags ?? [],
+    features: dbPartner.features ?? [],
+    languages: dbPartner.languages ?? [],
+    createdAt: dbPartner.created_at ?? new Date().toISOString(),
+    updatedAt: dbPartner.updated_at ?? new Date().toISOString(),
+
+    // Reconstruct nested PartnerType fields from DB columns
+    images: {
+      main: dbPartner.image ?? '',
+      gallery: dbPartner.gallery_images ?? [],
+    },
+    description: {
+      short: dbPartner.short_description ?? '',
+      long: dbPartner.long_description ?? '',
+    },
+    location: {
+      address: dbPartner.location ?? '',
+      coordinates: dbPartner.latitude !== null && dbPartner.longitude !== null ? 
+                   { latitude: Number(dbPartner.latitude), longitude: Number(dbPartner.longitude) } : undefined,
+      area: dbPartner.area ?? undefined,
+    },
+    // Parse JSONB fields, providing defaults
+    contact: parseJsonOrObject<PartnerType['contact']>(dbPartner.contact) ?? defaultContact,
+    hours: parseJsonOrObject<PartnerType['hours']>(dbPartner.open_hours) ?? defaultHours,
+    rating: parseJsonOrObject<PartnerType['rating']>(dbPartner.rating) ?? defaultRating,
+    accessibility: parseJsonOrObject<PartnerType['accessibility']>(dbPartner.accessibility) ?? defaultAccessibility,
+    paymentOptions: parseJsonOrObject<PartnerType['paymentOptions']>(dbPartner.payment_options) ?? defaultPaymentOptions,
+    faq: parseJsonOrObject<PartnerType['faq']>(dbPartner.faq) ?? defaultFaq,
+    attributes: parseJsonOrObject<PartnerType['attributes']>(dbPartner.attributes) ?? defaultAttributes,
+    
+    // Reconstruct prices object
+    prices: {
+      priceRange: (dbPartner.price_range as PriceIndicator) ?? 'Varies',
+      currency: dbPartner.currency ?? undefined,
+    },
+    
+    // Reconstruct promotion object
+    promotion: {
+        isSponsored: dbPartner.is_sponsored ?? false,
+        isFeatured: dbPartner.is_featured ?? false,
+        promotionEndsAt: dbPartner.sponsor_end_date ?? undefined,
+        // discount could be added here if stored separately or in attributes
+    },
+    
+    // Add potentially missing fields to contact object if they were flat in DB
+    // (This assumes contact JSONB is the primary source if it exists)
+    // contact: {
+    //   ...(parseJsonOrObject<PartnerType['contact']>(dbPartner.contact) ?? defaultContact),
+    //   email: dbPartner.email ?? (parseJsonOrObject<PartnerType['contact']>(dbPartner.contact) ?? defaultContact).email,
+    //   website: dbPartner.website ?? (parseJsonOrObject<PartnerType['contact']>(dbPartner.contact) ?? defaultContact).website,
+    //   social: parseJsonOrObject<PartnerType['contact']['social']>(dbPartner.social) ?? (parseJsonOrObject<PartnerType['contact']>(dbPartner.contact) ?? defaultContact).social,
+    // },
   };
+  
+  // Enhance the contact object with potentially flat DB fields if not already present
+  partner.contact = partner.contact || {}; // Ensure contact object exists
+  if (!partner.contact.email && dbPartner.email) partner.contact.email = dbPartner.email;
+  if (!partner.contact.website && dbPartner.website) partner.contact.website = dbPartner.website;
+  if (!partner.contact.social) {
+     const socialData = parseJsonOrObject<PartnerType['contact']['social']>(dbPartner.social);
+     if (socialData) partner.contact.social = socialData;
+  }
+  
 
-  // Type-specific enrichments would go here
-  // This is a simplified approach - in a real implementation, 
-  // you'd want to handle each partner type specifically
+  // Final assertion: ensure the constructed object matches PartnerType
+  // This requires confidence that all required fields are populated correctly.
+  return partner as PartnerType;
+}
 
-  return baseFields as any; // Final type assertion to avoid complex type issues
-} 
+// Remove the old mappers if they existed
+// export function mapPartnerToDb_OLD(...) { ... }
+// export function mapDbToPartner_OLD(...) { ... } 

@@ -6,816 +6,843 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
 export type Database = {
   public: {
     Tables: {
       chats: {
         Row: {
-          created_at: string;
-          id: string;
-          title: string | null;
-          updated_at: string;
-          user_id: string;
-        };
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          created_at?: string;
-          id?: string;
-          title?: string | null;
-          updated_at?: string;
-          user_id: string;
-        };
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          created_at?: string;
-          id?: string;
-          title?: string | null;
-          updated_at?: string;
-          user_id?: string;
-        };
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: 'chats_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       documents: {
         Row: {
-          content: string | null;
-          created_at: string;
-          id: string;
-          title: string;
-          user_id: string;
-        };
+          content: string | null
+          created_at: string
+          id: string
+          title: string
+          user_id: string
+        }
         Insert: {
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          title: string;
-          user_id: string;
-        };
+          content?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          user_id: string
+        }
         Update: {
-          content?: string | null;
-          created_at?: string;
-          id?: string;
-          title?: string;
-          user_id?: string;
-        };
+          content?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: 'documents_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
+            foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
           },
-        ];
-      };
+        ]
+      }
       events: {
         Row: {
-          id: string;
-          title: string;
-          category: string;
-          image: string;
-          time: string;
-          location: string;
-          rating: number;
-          reviews: number;
-          price: string;
-          description: string;
-          latitude: number;
-          longitude: number;
-          day: number;
-          organizer_name: string | null;
-          organizer_image: string | null;
-          organizer_contact_email: string | null;
-          organizer_contact_phone: string | null;
-          organizer_website: string | null;
-          duration: string | null;
-          recurrence_pattern: string | null;
-          recurrence_custom_pattern: string | null;
-          recurrence_end_date: string | null;
-          facilities: Json | null;
-          tickets: Json | null;
-          tags: string[] | null;
-          capacity: number | null;
-          attendee_count: number | null;
-          created_at: string;
-          updated_at: string;
-          is_sponsored: boolean | null;
-          sponsor_end_date: string | null;
-        };
+          attendee_count: number | null
+          capacity: number | null
+          category: string
+          created_at: string
+          day: number
+          description: string
+          duration: string | null
+          facilities: Json | null
+          id: string
+          image: string
+          is_sponsored: boolean | null
+          latitude: number
+          location: string
+          longitude: number
+          organizer_contact_email: string | null
+          organizer_contact_phone: string | null
+          organizer_image: string | null
+          organizer_name: string | null
+          organizer_website: string | null
+          price: string
+          rating: number
+          recurrence_custom_pattern: string | null
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          reviews: number
+          sponsor_end_date: string | null
+          tags: string[] | null
+          tickets: Json | null
+          time: string
+          title: string
+          updated_at: string
+        }
         Insert: {
-          id?: string;
-          title: string;
-          category: string;
-          image: string;
-          time: string;
-          location: string;
-          rating: number;
-          reviews: number;
-          price: string;
-          description: string;
-          latitude: number;
-          longitude: number;
-          day: number;
-          organizer_name?: string | null;
-          organizer_image?: string | null;
-          organizer_contact_email?: string | null;
-          organizer_contact_phone?: string | null;
-          organizer_website?: string | null;
-          duration?: string | null;
-          recurrence_pattern?: string | null;
-          recurrence_custom_pattern?: string | null;
-          recurrence_end_date?: string | null;
-          facilities?: Json | null;
-          tickets?: Json | null;
-          tags?: string[] | null;
-          capacity?: number | null;
-          attendee_count?: number | null;
-          created_at?: string;
-          updated_at?: string;
-          is_sponsored?: boolean | null;
-          sponsor_end_date?: string | null;
-        };
+          attendee_count?: number | null
+          capacity?: number | null
+          category: string
+          created_at?: string
+          day: number
+          description: string
+          duration?: string | null
+          facilities?: Json | null
+          id?: string
+          image: string
+          is_sponsored?: boolean | null
+          latitude: number
+          location: string
+          longitude: number
+          organizer_contact_email?: string | null
+          organizer_contact_phone?: string | null
+          organizer_image?: string | null
+          organizer_name?: string | null
+          organizer_website?: string | null
+          price: string
+          rating: number
+          recurrence_custom_pattern?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          reviews: number
+          sponsor_end_date?: string | null
+          tags?: string[] | null
+          tickets?: Json | null
+          time: string
+          title: string
+          updated_at?: string
+        }
         Update: {
-          id?: string;
-          title?: string;
-          category?: string;
-          image?: string;
-          time?: string;
-          location?: string;
-          rating?: number;
-          reviews?: number;
-          price?: string;
-          description?: string;
-          latitude?: number;
-          longitude?: number;
-          day?: number;
-          organizer_name?: string | null;
-          organizer_image?: string | null;
-          organizer_contact_email?: string | null;
-          organizer_contact_phone?: string | null;
-          organizer_website?: string | null;
-          duration?: string | null;
-          recurrence_pattern?: string | null;
-          recurrence_custom_pattern?: string | null;
-          recurrence_end_date?: string | null;
-          facilities?: Json | null;
-          tickets?: Json | null;
-          tags?: string[] | null;
-          capacity?: number | null;
-          attendee_count?: number | null;
-          created_at?: string;
-          updated_at?: string;
-          is_sponsored?: boolean | null;
-          sponsor_end_date?: string | null;
-        };
-        Relationships: [];
-      };
+          attendee_count?: number | null
+          capacity?: number | null
+          category?: string
+          created_at?: string
+          day?: number
+          description?: string
+          duration?: string | null
+          facilities?: Json | null
+          id?: string
+          image?: string
+          is_sponsored?: boolean | null
+          latitude?: number
+          location?: string
+          longitude?: number
+          organizer_contact_email?: string | null
+          organizer_contact_phone?: string | null
+          organizer_image?: string | null
+          organizer_name?: string | null
+          organizer_website?: string | null
+          price?: string
+          rating?: number
+          recurrence_custom_pattern?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          reviews?: number
+          sponsor_end_date?: string | null
+          tags?: string[] | null
+          tickets?: Json | null
+          time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       file_uploads: {
         Row: {
-          bucket_id: string;
-          chat_id: string;
-          content_type: string;
-          created_at: string;
-          filename: string;
-          id: string;
-          original_name: string;
-          size: number;
-          storage_path: string;
-          url: string;
-          user_id: string;
-          version: number;
-        };
+          bucket_id: string
+          chat_id: string
+          content_type: string
+          created_at: string
+          filename: string
+          id: string
+          original_name: string
+          size: number
+          storage_path: string
+          url: string
+          user_id: string
+          version: number
+        }
         Insert: {
-          bucket_id?: string;
-          chat_id: string;
-          content_type: string;
-          created_at?: string;
-          filename: string;
-          id?: string;
-          original_name: string;
-          size: number;
-          storage_path: string;
-          url: string;
-          user_id: string;
-          version?: number;
-        };
+          bucket_id?: string
+          chat_id: string
+          content_type: string
+          created_at?: string
+          filename: string
+          id?: string
+          original_name: string
+          size: number
+          storage_path: string
+          url: string
+          user_id: string
+          version?: number
+        }
         Update: {
-          bucket_id?: string;
-          chat_id?: string;
-          content_type?: string;
-          created_at?: string;
-          filename?: string;
-          id?: string;
-          original_name?: string;
-          size?: number;
-          storage_path?: string;
-          url?: string;
-          user_id?: string;
-          version?: number;
-        };
+          bucket_id?: string
+          chat_id?: string
+          content_type?: string
+          created_at?: string
+          filename?: string
+          id?: string
+          original_name?: string
+          size?: number
+          storage_path?: string
+          url?: string
+          user_id?: string
+          version?: number
+        }
         Relationships: [
           {
-            foreignKeyName: 'file_uploads_chat_id_fkey';
-            columns: ['chat_id'];
-            isOneToOne: false;
-            referencedRelation: 'chats';
-            referencedColumns: ['id'];
+            foreignKeyName: "file_uploads_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
           },
-        ];
-      };
-      messages: {
-        Row: {
-          chat_id: string;
-          content: Json;
-          created_at: string;
-          id: string;
-          role: string;
-          updated_at: string;
-        };
-        Insert: {
-          chat_id: string;
-          content: Json;
-          created_at?: string;
-          id?: string;
-          role: string;
-          updated_at?: string;
-        };
-        Update: {
-          chat_id?: string;
-          content?: Json;
-          created_at?: string;
-          id?: string;
-          role?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'messages_chat_id_fkey';
-            columns: ['chat_id'];
-            isOneToOne: false;
-            referencedRelation: 'chats';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      profiles: {
-        Row: {
-          id: string;
-          username: string | null;
-          name: string | null;
-          bio: string | null;
-          avatar: string | null;
-          join_date: string | null;
-          location: string | null;
-          events_attended: number | null;
-          favorite_places: string[] | null;
-          interests: string[] | null;
-          social_links: Json | null;
-          notifications: Json | null;
-          privacy_settings: Json | null;
-          preferences: Json | null;
-          payment_methods: Json | null;
-          created_at: string | null;
-          updated_at: string | null;
-          email: string | null;
-          is_admin: boolean;
-        };
-        Insert: {
-          id: string;
-          username?: string | null;
-          name?: string | null;
-          bio?: string | null;
-          avatar?: string | null;
-          join_date?: string | null;
-          location?: string | null;
-          events_attended?: number | null;
-          favorite_places?: string[] | null;
-          interests?: string[] | null;
-          social_links?: Json | null;
-          notifications?: Json | null;
-          privacy_settings?: Json | null;
-          preferences?: Json | null;
-          payment_methods?: Json | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-          email?: string | null;
-          is_admin?: boolean;
-        };
-        Update: {
-          id?: string;
-          username?: string | null;
-          name?: string | null;
-          bio?: string | null;
-          avatar?: string | null;
-          join_date?: string | null;
-          location?: string | null;
-          events_attended?: number | null;
-          favorite_places?: string[] | null;
-          interests?: string[] | null;
-          social_links?: Json | null;
-          notifications?: Json | null;
-          privacy_settings?: Json | null;
-          preferences?: Json | null;
-          payment_methods?: Json | null;
-          created_at?: string | null;
-          updated_at?: string | null;
-          email?: string | null;
-          is_admin?: boolean;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'profiles_id_fkey';
-            columns: ['id'];
-            isOneToOne: true;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      suggestions: {
-        Row: {
-          created_at: string;
-          description: string | null;
-          document_created_at: string;
-          document_id: string;
-          id: string;
-          is_resolved: boolean;
-          original_text: string;
-          suggested_text: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          description?: string | null;
-          document_created_at: string;
-          document_id: string;
-          id?: string;
-          is_resolved?: boolean;
-          original_text: string;
-          suggested_text: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          description?: string | null;
-          document_created_at?: string;
-          document_id?: string;
-          id?: string;
-          is_resolved?: boolean;
-          original_text?: string;
-          suggested_text?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'suggestions_document_id_document_created_at_fkey';
-            columns: ['document_id', 'document_created_at'];
-            isOneToOne: false;
-            referencedRelation: 'documents';
-            referencedColumns: ['id', 'created_at'];
-          },
-          {
-            foreignKeyName: 'suggestions_user_id_fkey';
-            columns: ['user_id'];
-            isOneToOne: false;
-            referencedRelation: 'users';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      users: {
-        Row: {
-          created_at: string;
-          email: string;
-          id: string;
-          updated_at: string;
-        };
-        Insert: {
-          created_at?: string;
-          email: string;
-          id?: string;
-          updated_at?: string;
-        };
-        Update: {
-          created_at?: string;
-          email?: string;
-          id?: string;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
-      votes: {
-        Row: {
-          chat_id: string;
-          is_upvoted: boolean;
-          message_id: string;
-        };
-        Insert: {
-          chat_id: string;
-          is_upvoted: boolean;
-          message_id: string;
-        };
-        Update: {
-          chat_id?: string;
-          is_upvoted?: boolean;
-          message_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'votes_chat_id_fkey';
-            columns: ['chat_id'];
-            isOneToOne: false;
-            referencedRelation: 'chats';
-            referencedColumns: ['id'];
-          },
-          {
-            foreignKeyName: 'votes_message_id_fkey';
-            columns: ['message_id'];
-            isOneToOne: false;
-            referencedRelation: 'messages';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      partners: {
-        Row: {
-          id: string;
-          name: string;
-          category: string;
-          image: string;
-          short_description: string;
-          location: string;
-          rating: number;
-          reviews: number;
-          price_range: string;
-          features: string[];
-          open_hours: string;
-          contact: string;
-          coordinates: Json;
-          gallery: string[];
-          long_description: string;
-          is_sponsored: boolean | null;
-          sponsor_end_date: string | null;
-          website: string | null;
-          email: string | null;
-          social: Json | null;
-          tags: string[] | null;
-          availability: Json | null;
-          accessibility: Json | null;
-          payment_options: Json | null;
-          languages: string[] | null;
-          discounts: Json | null;
-          services: string[] | null;
-          customer_reviews: Json | null;
-          faq: Json | null;
-          updated_at: string | null;
-          created_at: string;
-          rental_options: Json | null;
-          vehicle_details: Json | null;
-          accommodation_details: Json | null;
-          business_details: Json | null;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          category: string;
-          image: string;
-          short_description: string;
-          location: string;
-          rating: number;
-          reviews: number;
-          price_range: string;
-          features: string[];
-          open_hours: string;
-          contact: string;
-          coordinates: Json;
-          gallery: string[];
-          long_description: string;
-          is_sponsored?: boolean | null;
-          sponsor_end_date?: string | null;
-          website?: string | null;
-          email?: string | null;
-          social?: Json | null;
-          tags?: string[] | null;
-          availability?: Json | null;
-          accessibility?: Json | null;
-          payment_options?: Json | null;
-          languages?: string[] | null;
-          discounts?: Json | null;
-          services?: string[] | null;
-          customer_reviews?: Json | null;
-          faq?: Json | null;
-          updated_at?: string | null;
-          created_at?: string;
-          rental_options?: Json | null;
-          vehicle_details?: Json | null;
-          accommodation_details?: Json | null;
-          business_details?: Json | null;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          category?: string;
-          image?: string;
-          short_description?: string;
-          location?: string;
-          rating?: number;
-          reviews?: number;
-          price_range?: string;
-          features?: string[];
-          open_hours?: string;
-          contact?: string;
-          coordinates?: Json;
-          gallery?: string[];
-          long_description?: string;
-          is_sponsored?: boolean | null;
-          sponsor_end_date?: string | null;
-          website?: string | null;
-          email?: string | null;
-          social?: Json | null;
-          tags?: string[] | null;
-          availability?: Json | null;
-          accessibility?: Json | null;
-          payment_options?: Json | null;
-          languages?: string[] | null;
-          discounts?: Json | null;
-          services?: string[] | null;
-          customer_reviews?: Json | null;
-          faq?: Json | null;
-          updated_at?: string | null;
-          created_at?: string;
-          rental_options?: Json | null;
-          vehicle_details?: Json | null;
-          accommodation_details?: Json | null;
-          business_details?: Json | null;
-        };
-        Relationships: [];
-      };
+        ]
+      }
       guides: {
         Row: {
-          id: string;
-          created_at: string;
-          updated_at: string;
-          title: string;
-          category: string;
-          main_image: string;
-          short_description: string;
-          long_description: string;
-          slug: string | null;
-          rating: number | null;
-          reviews: number | null;
-          is_featured: boolean | null;
-          tags: string[] | null;
-          location: string | null;
-          coordinates: Json | null;
-          gallery_images: string[] | null;
-          sections: Json | null;
-          items: Json | null;
-          contacts: Json | null;
-          practical_info: Json | null;
-          recommendations: Json | null;
-          testimonials: Json | null;
-        };
+          accessibility: Json | null
+          area: string | null
+          attributes: Json | null
+          category: string
+          contact: Json | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          faq: Json | null
+          features: string[] | null
+          gallery_images: string[] | null
+          hours: Json | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          is_sponsored: boolean | null
+          languages: string[] | null
+          last_updated: string | null
+          latitude: number | null
+          location: string | null
+          long_description: string | null
+          longitude: number | null
+          name: string
+          payment_options: Json | null
+          practical_info: Json | null
+          price_range: string | null
+          rating: Json | null
+          related_contacts: Json | null
+          section: string
+          sections: Json | null
+          slug: string | null
+          sponsor_end_date: string | null
+          subcategory: string | null
+          tags: string[] | null
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          title: string;
-          category: string;
-          main_image: string;
-          short_description: string;
-          long_description: string;
-          slug?: string | null;
-          rating?: number | null;
-          reviews?: number | null;
-          is_featured?: boolean | null;
-          tags?: string[] | null;
-          location?: string | null;
-          coordinates?: Json | null;
-          gallery_images?: string[] | null;
-          sections?: Json | null;
-          items?: Json | null;
-          contacts?: Json | null;
-          practical_info?: Json | null;
-          recommendations?: Json | null;
-          testimonials?: Json | null;
-        };
+          accessibility?: Json | null
+          area?: string | null
+          attributes?: Json | null
+          category: string
+          contact?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          faq?: Json | null
+          features?: string[] | null
+          gallery_images?: string[] | null
+          hours?: Json | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_sponsored?: boolean | null
+          languages?: string[] | null
+          last_updated?: string | null
+          latitude?: number | null
+          location?: string | null
+          long_description?: string | null
+          longitude?: number | null
+          name: string
+          payment_options?: Json | null
+          practical_info?: Json | null
+          price_range?: string | null
+          rating?: Json | null
+          related_contacts?: Json | null
+          section: string
+          sections?: Json | null
+          slug?: string | null
+          sponsor_end_date?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          created_at?: string;
-          updated_at?: string;
-          title?: string;
-          category?: string;
-          main_image?: string;
-          short_description?: string;
-          long_description?: string;
-          slug?: string | null;
-          rating?: number | null;
-          reviews?: number | null;
-          is_featured?: boolean | null;
-          tags?: string[] | null;
-          location?: string | null;
-          coordinates?: Json | null;
-          gallery_images?: string[] | null;
-          sections?: Json | null;
-          items?: Json | null;
-          contacts?: Json | null;
-          practical_info?: Json | null;
-          recommendations?: Json | null;
-          testimonials?: Json | null;
-        };
-        Relationships: [];
-      };
-    };
+          accessibility?: Json | null
+          area?: string | null
+          attributes?: Json | null
+          category?: string
+          contact?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          faq?: Json | null
+          features?: string[] | null
+          gallery_images?: string[] | null
+          hours?: Json | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          is_sponsored?: boolean | null
+          languages?: string[] | null
+          last_updated?: string | null
+          latitude?: number | null
+          location?: string | null
+          long_description?: string | null
+          longitude?: number | null
+          name?: string
+          payment_options?: Json | null
+          practical_info?: Json | null
+          price_range?: string | null
+          rating?: Json | null
+          related_contacts?: Json | null
+          section?: string
+          sections?: Json | null
+          slug?: string | null
+          sponsor_end_date?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          chat_id: string
+          content: Json
+          created_at: string
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          chat_id: string
+          content: Json
+          created_at?: string
+          id?: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          chat_id?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          accessibility: Json | null
+          area: string | null
+          attributes: Json | null
+          contact: Json | null
+          created_at: string | null
+          currency: string | null
+          email: string | null
+          faq: Json | null
+          features: string[] | null
+          gallery_images: string[] | null
+          id: string
+          image: string | null
+          is_featured: boolean | null
+          is_sponsored: boolean | null
+          languages: string[] | null
+          latitude: number | null
+          location: string | null
+          long_description: string | null
+          longitude: number | null
+          main_category: string
+          name: string
+          open_hours: Json | null
+          payment_options: Json | null
+          price_range: string | null
+          rating: Json | null
+          ref_id: string | null
+          section: string
+          short_description: string | null
+          social: Json | null
+          sponsor_end_date: string | null
+          subcategory: string | null
+          tags: string[] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          accessibility?: Json | null
+          area?: string | null
+          attributes?: Json | null
+          contact?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          faq?: Json | null
+          features?: string[] | null
+          gallery_images?: string[] | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          is_sponsored?: boolean | null
+          languages?: string[] | null
+          latitude?: number | null
+          location?: string | null
+          long_description?: string | null
+          longitude?: number | null
+          main_category: string
+          name: string
+          open_hours?: Json | null
+          payment_options?: Json | null
+          price_range?: string | null
+          rating?: Json | null
+          ref_id?: string | null
+          section: string
+          short_description?: string | null
+          social?: Json | null
+          sponsor_end_date?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          accessibility?: Json | null
+          area?: string | null
+          attributes?: Json | null
+          contact?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          faq?: Json | null
+          features?: string[] | null
+          gallery_images?: string[] | null
+          id?: string
+          image?: string | null
+          is_featured?: boolean | null
+          is_sponsored?: boolean | null
+          languages?: string[] | null
+          latitude?: number | null
+          location?: string | null
+          long_description?: string | null
+          longitude?: number | null
+          name?: string
+          payment_options?: Json | null
+          practical_info?: Json | null
+          price_range?: string | null
+          rating?: Json | null
+          ref_id?: string | null
+          section?: string
+          short_description?: string | null
+          social?: Json | null
+          sponsor_end_date?: string | null
+          subcategory?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          events_attended: number | null
+          favorite_places: string[] | null
+          id: string
+          interests: string[] | null
+          is_admin: boolean
+          join_date: string | null
+          location: string | null
+          name: string | null
+          notifications: Json | null
+          payment_methods: Json | null
+          preferences: Json | null
+          privacy_settings: Json | null
+          social_links: Json | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          events_attended?: number | null
+          favorite_places?: string[] | null
+          id: string
+          interests?: string[] | null
+          is_admin?: boolean
+          join_date?: string | null
+          location?: string | null
+          name?: string | null
+          notifications?: Json | null
+          payment_methods?: Json | null
+          preferences?: Json | null
+          privacy_settings?: Json | null
+          social_links?: Json | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: string | null
+          events_attended?: number | null
+          favorite_places?: string[] | null
+          id?: string
+          interests?: string[] | null
+          is_admin?: boolean
+          join_date?: string | null
+          location?: string | null
+          name?: string | null
+          notifications?: Json | null
+          payment_methods?: Json | null
+          preferences?: Json | null
+          privacy_settings?: Json | null
+          social_links?: Json | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      suggestions: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_created_at: string
+          document_id: string
+          id: string
+          is_resolved: boolean
+          original_text: string
+          suggested_text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_created_at: string
+          document_id: string
+          id?: string
+          is_resolved?: boolean
+          original_text: string
+          suggested_text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_created_at?: string
+          document_id?: string
+          id?: string
+          is_resolved?: boolean
+          original_text?: string
+          suggested_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestions_document_id_document_created_at_fkey"
+            columns: ["document_id", "document_created_at"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id", "created_at"]
+          },
+          {
+            foreignKeyName: "suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          chat_id: string
+          is_upvoted: boolean
+          message_id: string
+        }
+        Insert: {
+          chat_id: string
+          is_upvoted: boolean
+          message_id: string
+        }
+        Update: {
+          chat_id?: string
+          is_upvoted?: boolean
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
+      execute_sql: {
+        Args: { query_text: string }
+        Returns: Json
+      }
       get_document_latest_version: {
-        Args: {
-          doc_id: string;
-        };
-        Returns: string;
-      };
+        Args: { doc_id: string }
+        Returns: string
+      }
       get_latest_document: {
-        Args: {
-          doc_id: string;
-          auth_user_id: string;
-        };
+        Args: { doc_id: string; auth_user_id: string }
         Returns: {
-          id: string;
-          user_id: string;
-          title: string;
-          content: string;
-          created_at: string;
-        }[];
-      };
+          id: string
+          user_id: string
+          title: string
+          content: string
+          created_at: string
+        }[]
+      }
       get_next_file_version: {
-        Args: {
-          p_bucket_id: string;
-          p_storage_path: string;
-        };
-        Returns: number;
-      };
+        Args: { p_bucket_id: string; p_storage_path: string }
+        Returns: number
+      }
+      get_total_users_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       gtrgm_compress: {
-        Args: {
-          '': unknown;
-        };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       gtrgm_decompress: {
-        Args: {
-          '': unknown;
-        };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       gtrgm_in: {
-        Args: {
-          '': unknown;
-        };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       gtrgm_options: {
-        Args: {
-          '': unknown;
-        };
-        Returns: undefined;
-      };
+        Args: { "": unknown }
+        Returns: undefined
+      }
       gtrgm_out: {
-        Args: {
-          '': unknown;
-        };
-        Returns: unknown;
-      };
+        Args: { "": unknown }
+        Returns: unknown
+      }
       set_limit: {
-        Args: {
-          '': number;
-        };
-        Returns: number;
-      };
+        Args: { "": number }
+        Returns: number
+      }
       show_limit: {
-        Args: Record<PropertyKey, never>;
-        Returns: number;
-      };
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       show_trgm: {
-        Args: {
-          '': string;
-        };
-        Returns: string[];
-      };
-    };
+        Args: { "": string }
+        Returns: string[]
+      }
+    }
     Enums: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+      [_ in never]: never
+    }
+  }
+}
 
-type PublicSchema = Database[Extract<keyof Database, 'public'>];
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
-      Row: infer R;
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
-        PublicSchema['Views'])
-    ? (PublicSchema['Tables'] &
-        PublicSchema['Views'])[PublicTableNameOrOptions] extends {
-        Row: infer R;
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
       }
       ? R
       : never
-    : never;
+    : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Insert: infer I;
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Insert: infer I;
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
       }
       ? I
       : never
-    : never;
+    : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Update: infer U;
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Update: infer U;
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
       }
       ? U
       : never
-    : never;
+    : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema['Enums']
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
-    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
-    : never;
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema['CompositeTypes']
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof Database
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
-    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
-    : never;
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
 
 export type Client = SupabaseClient<Database>;
 

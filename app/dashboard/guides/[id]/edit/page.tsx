@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { getGuideById } from "@/db/cached-queries"; // Can be imported in Server Component
+import { Guide } from "@/types/newGuide"; // Update import to use the new Guide type
 
 import { EditGuideForm } from "../edit-guide-form"; // Import the new Client Component
 
@@ -38,11 +39,11 @@ export default async function EditGuidePage(props: EditGuidePageProps) {
           </Link>
         </Button>
         {/* Use fetched data directly for the title */}
-        <h1 className="text-3xl font-bold">Edit guide: {guideData.title}</h1>
+        <h1 className="text-3xl font-bold">Edit guide: {guideData.name}</h1>
       </div>
 
       {/* Render the Client Component form, passing the fetched data */}
-      <EditGuideForm initialData={guideData} />
+      <EditGuideForm initialData={guideData as Guide} />
     </div>
   );
 } 

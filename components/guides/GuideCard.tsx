@@ -5,19 +5,11 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { GuideType } from "@/types/guide";
+import { Guide, getCategoryDisplayName } from "@/types/newGuide";
 
 interface GuideCardProps {
-  guide: GuideType;
+  guide: Guide;
 }
-
-// Helper function to format category names for display
-const formatCategory = (category: string): string => {
-  return category
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
 
 export const GuideCard = ({ guide }: GuideCardProps) => {
   const PlaceholderIcon = BookOpen; // Default placeholder
@@ -35,12 +27,12 @@ export const GuideCard = ({ guide }: GuideCardProps) => {
 
   return (
     <div className="rounded-lg overflow-hidden shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full">
-      <div className="relative h-48 w-full bg-gray-200"> 
-        {guide.mainImage ? (
-          <Image 
-            src={guide.mainImage} 
-            alt={guide.title} 
-            fill 
+      <div className="relative h-48 w-full bg-gray-200">
+        {guide.images?.main ? (
+          <Image
+            src={guide.images.main}
+            alt={guide.name}
+            fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
@@ -59,30 +51,30 @@ export const GuideCard = ({ guide }: GuideCardProps) => {
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
           <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded font-medium">
-            {formatCategory(guide.category)}
+            {getCategoryDisplayName(guide.category)}
           </span>
-          {guide.rating && guide.rating > 0 && (
+          {guide.rating?.score && guide.rating.score > 0 && (
             <div className="flex items-center">
               <Star className="size-4 text-yellow-500 mr-1" />
-              <span className="text-sm font-medium">{guide.rating.toFixed(1)}</span>
-              {guide.reviews && guide.reviews > 0 && (
-                <span className="text-xs text-gray-500 ml-1">({guide.reviews})</span>
+              <span className="text-sm font-medium">{guide.rating.score.toFixed(1)}</span>
+              {guide.rating.reviewCount && guide.rating.reviewCount > 0 && (
+                <span className="text-xs text-gray-500 ml-1">({guide.rating.reviewCount})</span>
               )}
             </div>
           )}
         </div>
         
-        <h3 className="font-bold text-lg mb-2 line-clamp-2">{guide.title}</h3>
+        <h3 className="font-bold text-lg mb-2 line-clamp-2">{guide.name}</h3>
         
-        {guide.shortDescription && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-3 flex-1">{guide.shortDescription}</p>
+        {guide.description?.short && (
+          <p className="text-sm text-gray-600 mb-3 line-clamp-3 flex-1">{guide.description.short}</p>
         )}
 
         <div className="space-y-1 text-sm text-gray-600 mb-4 mt-auto"> {/* mt-auto pushes this section down */}
-          {guide.location && (
+          {guide.location?.address && (
             <div className="flex items-center">
               <MapPin className="size-4 mr-2 shrink-0" />
-              <span>{guide.location}</span>
+              <span>{guide.location.address}</span>
             </div>
           )}
            <div className="flex items-center text-xs text-gray-500">
