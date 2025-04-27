@@ -23,7 +23,7 @@ import {
   deleteChatById,
 } from '@/db/mutations';
 import { createClient, validateToken } from '@/lib/supabase/server';
-import { MessageRole } from '@/lib/types';
+import { MessageRole } from '@/lib/supabase/types';
 import {
   generateUUID,
   getMostRecentUserMessage,
@@ -222,7 +222,7 @@ export async function POST(request: Request) {
       system: systemPrompt,
       messages: coreMessages,
       maxSteps: 5,
-      experimental_activeTools: ['getWeather', 'getEvents'],
+      experimental_activeTools: allTools,
       tools: {
         getWeather: tools.getWeather,
         getEvents: tools.getEvents,

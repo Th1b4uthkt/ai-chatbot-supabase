@@ -1,68 +1,115 @@
-import { ArrowLeft, InfoIcon } from "lucide-react" // Added InfoIcon
-import Link from "next/link"
-import { notFound } from "next/navigation"
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert" // Import Alert
-import { Button } from "@/components/ui/button"
-import { getEventById } from "@/db/cached-queries"
+import { createClient } from '@/lib/supabase/server';
+import { Button } from '@/components/ui/button';
+import { EventEditForm } from '@/components/dashboard/event-edit-form';
+import { EventType } from '@/types/events';
 
-import { EventEditForm } from "./EventEditForm" // Import the new client component
-
-// Interface that spécifies params as a Promise
-interface EventEditPageProps {
-  params: Promise<{ id: string }>;
-}
-
-// Define the Page component (Server Component)
-export default async function EventEditPage(props: EventEditPageProps) {
-  // Await the params Promise to get the id
-  const params = await props.params;
-  const { id } = params;
-
-  // Fetch event data on the server using the id
-  const event = await getEventById(id);
-
-  // Handle case where event is not found
-  if (!event) {
-    // Use Alert component for better visual feedback
-    return (
-       <div className="container mx-auto py-8">
-         <Alert variant="destructive">
-            <InfoIcon className="size-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              The requested event could not be found. It might have been deleted.
-            </AlertDescription>
-          </Alert>
-          <div className="mt-4">
-             <Button asChild variant="outline">
-               <Link href="/dashboard/events">
-                 <ArrowLeft className="mr-2 size-4" /> Back to Events List
-               </Link>
-            </Button>
-          </div>
-       </div>
-    );
+export default async function EditEventPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const supabase = await createClient();
+  
+  // Next.js 15 requires awaiting params
+  const { id } = await params;
+  
+  // Check if user is authenticated and is admin
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
   }
-
-  // Render the Client Component form, passing the fetched data
+  
+  // Fetch user metadata to check if admin
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single();
+    
+  // Redirect if not admin
+  if (!adminProfile?.is_admin) {
+    redirect('/');
+  }
+  
+  // Fetch the event being edited
+  const { data: eventData } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', id)
+    .single();
+    
+  if (!eventData) {
+    redirect('/dashboard/events');
+  }
+  
+  // Parse nested JSON objects
+  const event = {
+    ...eventData,
+    // Create coordinates object from latitude/longitude
+    coordinates: {
+      latitude: Number(eventData.latitude) || 0,
+      longitude: Number(eventData.longitude) || 0
+    },
+    
+    // Create organizer object from separate fields
+    organizer: {
+      name: eventData.organizer_name || '',
+      image: eventData.organizer_image || '',
+      contactEmail: eventData.organizer_contact_email || '',
+      contactPhone: eventData.organizer_contact_phone || '',
+      website: eventData.organizer_website || ''
+    },
+    
+    // Handle facilities and tickets which are already JSON objects in the database
+    facilities: typeof eventData.facilities === 'object' ? eventData.facilities : 
+               typeof eventData.facilities === 'string' ? JSON.parse(eventData.facilities) : {},
+      
+    tickets: typeof eventData.tickets === 'object' ? eventData.tickets : 
+             typeof eventData.tickets === 'string' ? JSON.parse(eventData.tickets) : {},
+    
+    // Reconstruct recurrence object
+    recurrence: eventData.recurrence_pattern ? {
+      pattern: eventData.recurrence_pattern,
+      customPattern: eventData.recurrence_custom_pattern,
+      endDate: eventData.recurrence_end_date
+    } : null,
+    
+    // Map attendee_count to attendeeCount for frontend consistency
+    attendeeCount: eventData.attendee_count
+  } as EventType;
+  
   return (
-    // Use container and consistent spacing like the NewEventPage
-    <div className="container mx-auto py-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Button asChild variant="outline" size="icon">
-          <Link href="/dashboard/events">
-            <ArrowLeft className="size-4" />
-          </Link>
-        </Button>
-        <div>
-           {/* Break title onto two lines if long */}
-          <h1 className="text-2xl font-bold break-words">Edit Event</h1>
-          <p className="text-muted-foreground truncate max-w-md">{event.title}</p> {/* Show event title subtly */}
-        </div>
+    <div className="container max-w-5xl mx-auto px-4 py-6">
+      <div className="mb-6">
+        <Link 
+          href={`/dashboard/events/${id}/view`}
+          className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Event Details</span>
+        </Link>
       </div>
-      {/* Render the client form component with initial data */}
-      <EventEditForm initialEventData={event} eventId={id} />
+      
+      <div className="flex flex-col gap-2 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Edit Event: {event.title}
+        </h1>
+        <p className="text-muted-foreground">
+          Update event information and details
+        </p>
+      </div>
+      
+      <div className="bg-card/50 backdrop-blur border rounded-lg p-6 shadow-sm">
+        <EventEditForm 
+          event={event} 
+          redirectUrl={`/dashboard/events/${id}/view`}
+        />
+      </div>
     </div>
   );
-}
+} 

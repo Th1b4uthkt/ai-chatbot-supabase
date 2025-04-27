@@ -1,774 +1,227 @@
-// =============================
-// BASE TYPES AND ENUMERATIONS
-// =============================
+<a href="https://chat.vercel.ai/">
+  <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
+  <h1 align="center">Next.js AI Chatbot x Supabase</h1>
+</a>
 
-// Enumération principale des catégories par section
-export enum PartnerSection {
-  ESTABLISHMENT = "establishment", // Lieux & Établissements
-  SERVICE = "service"              // Services & Prestations
-}
+<p align="center">
+  An Open-Source AI Chatbot Template Built With Next.js and the AI SDK by Vercel.
+</p>
 
-// Catégories pour ESTABLISHMENT (Lieux & Établissements)
-export enum EstablishmentCategory {
-  // Hébergement
-  ACCOMMODATION = "accommodation",
-  // Restauration & Bars
-  FOOD_DRINK = "food_drink",  
-  // Loisirs & Activités
-  LEISURE = "leisure",
-  // Shopping & Artisanat
-  SHOPPING = "shopping",
-  // Culture & Événements
-  CULTURE = "culture",
-  // Transports partenaires (établissements)
-  TRANSPORT_PROVIDER = "transport_provider"
-}
+<p align="center">
+  <a href="#features"><strong>Features</strong></a> ·
+  <a href="#model-providers"><strong>Model Providers</strong></a> ·
+  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
+  <a href="#running-locally"><strong>Running locally</strong></a>
+</p>
+<br/>
 
-// Catégories pour SERVICE (Services & Prestations)
-export enum ServiceCategory {
-  // Transport & Mobilité
-  MOBILITY = "mobility",
-  // Santé & Urgences
-  HEALTH = "health",
-  // Bien-être & Esthétique
-  WELLNESS = "wellness",
-  // Maintenance & Bricolage
-  MAINTENANCE = "maintenance",
-  // Immobilier & Location
-  REAL_ESTATE = "real_estate",
-  // Professions Libérales
-  PROFESSIONAL = "professional",
-  // Automobile & Marine
-  VEHICLE_REPAIR = "vehicle_repair"
-}
+## Features
 
-// Sous-catégories pour une organisation plus fine - Extensible si besoin
-export enum PartnerSubcategory {
-  // Hébergement
-  HOTEL = "hotel",
-  BUNGALOW = "bungalow",
-  VILLA = "villa",
-  GUESTHOUSE = "guesthouse",
-  HOSTEL = "hostel",
-  
-  // Restauration & Bars
-  RESTAURANT = "restaurant",
-  CAFE = "cafe",
-  BAR = "bar",
-  BEACH_BAR = "beach_bar",
-  FOOD_TRUCK = "food_truck",
-  STREET_FOOD = "street_food",
-  
-  // Loisirs & Activités
-  DIVING = "diving",
-  YOGA = "yoga",
-  EXCURSION = "excursion",
-  WATER_SPORTS = "water_sports",
-  HIKING = "hiking",
-  
-  // Shopping & Artisanat
-  MARKET = "market",
-  CLOTHING = "clothing_store",
-  SOUVENIR = "souvenir_shop",
-  CRAFT_SHOP = "craft_shop",
-  
-  // Culture & Événements
-  GALLERY = "gallery",
-  CONCERT_VENUE = "concert_venue",
-  FESTIVAL = "festival",
-  WORKSHOP = "workshop",
-  CLASSES = "classes",
-  
-  // Transport partenaires
-  FERRY = "ferry",
-  BOAT_TOUR = "boat_tour",
-  SHUTTLE = "shuttle",
-  
-  // Transport & Mobilité
-  TAXI = "taxi",
-  SCOOTER_RENTAL = "scooter_rental",
-  CAR_RENTAL = "car_rental",
-  PRIVATE_DRIVER = "private_driver",
-  BIKE_RENTAL = "bike_rental",
-  
-  // Santé & Urgences
-  HOSPITAL = "hospital",
-  CLINIC = "clinic",
-  DOCTOR = "doctor",
-  PHARMACY = "pharmacy",
-  EMERGENCY = "emergency",
-  
-  // Bien-être & Esthétique
-  MASSAGE = "massage",
-  SPA = "spa",
-  SALON = "beauty_salon",
-  YOGA_STUDIO = "yoga_studio",
-  
-  // Maintenance & Bricolage
-  ELECTRICIAN = "electrician",
-  PLUMBER = "plumber",
-  HANDYMAN = "handyman",
-  GARDENER = "gardener",
-  
-  // Immobilier & Location
-  REAL_ESTATE_AGENCY = "real_estate_agency",
-  PROPERTY_MANAGEMENT = "property_management",
-  LONG_TERM_RENTAL = "long_term_rental",
-  
-  // Professions Libérales
-  ARCHITECT = "architect",
-  LAWYER = "lawyer",
-  ACCOUNTANT = "accountant",
-  CONSULTANT = "consultant",
-  
-  // Automobile & Marine
-  CAR_MECHANIC = "car_mechanic",
-  SCOOTER_REPAIR = "scooter_repair",
-  BOAT_REPAIR = "boat_repair",
-  
-  // Divers
-  OTHER = "other"
-}
+- [Next.js](https://nextjs.org) App Router
+  - Advanced routing for seamless navigation and performance
+  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
+  - Built-in optimizations for images, fonts, and static assets
+- [AI SDK](https://sdk.vercel.ai/docs)
+  - Unified API for generating text, structured objects, and tool calls with LLMs
+  - Hooks for building dynamic chat and generative user interfaces
+  - Supports OpenAI (default), Anthropic, Cohere, and other model providers
+  - Built-in streaming support for real-time AI responses
+- [shadcn/ui](https://ui.shadcn.com)
+  - Styling with [Tailwind CSS](https://tailwindcss.com)
+  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
+  - Customizable themes and dark mode support
+- [Supabase](https://supabase.com) Integration
+  - [Supabase Postgres DB](https://supabase.com/docs/guides/database) for robust chat history and user data storage
+  - [Supabase File Storage](https://supabase.com/docs/guides/storage) for efficient file management and uploads
+  - [Supabase Auth](https://supabase.com/docs/guides/auth) with multiple authentication providers and row-level security
+  - Real-time subscriptions for live updates
 
-// =============================
-// INTERFACES PRINCIPALES
-// =============================
+## Model Providers
 
-// Interface de base pour tous les partenaires
-export interface BasePartner {
-  id: string;
-  name: string;
-  section: PartnerSection;
-  mainCategory: EstablishmentCategory | ServiceCategory;
-  subcategory: PartnerSubcategory;
-  images: {
-    main: string;
-    gallery?: string[];
-  };
-  description: {
-    short: string;
-    long: string;
-  };
-  location: {
-    address: string;
-    coordinates: {
-      latitude: number;
-      longitude: number;
-    };
-    area?: string; // Zone de l'île (Nord, Sud, Est, Ouest, etc.)
-  };
-  contact: {
-    phone?: string;
-    email?: string;
-    website?: string;
-    lineId?: string;
-    social?: {
-      facebook?: string;
-      instagram?: string;
-      twitter?: string;
-    };
-  };
-  hours: {
-    regularHours?: string; // Ex: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM"
-    seasonalChanges?: string;
-    open24h?: boolean;
-  };
-  rating: {
-    score?: number; // Sur 5 étoiles
-    reviewCount?: number;
-    testimonials?: Array<{
-      author: string;
-      rating: number;
-      comment: string;
-      date: string;
-    }>;
-  };
-  tags: string[]; // Pour la recherche et le filtrage
-  prices: {
-    priceRange: "€" | "€€" | "€€€" | "€€€€"; // Indicateur général
-    currency?: string; // THB, USD, EUR
-  };
-  features: string[]; // Caractéristiques principales
-  languages?: string[]; // Langues parlées
-  createdAt: string;
-  updatedAt: string;
-  
-  // Champs pour le sponsoring et la mise en avant
-  promotion?: {
-    isSponsored: boolean;
-    isFeatured?: boolean;
-    promotionEndsAt?: string;
-    discount?: {
-      description: string;
-      code?: string;
-      validUntil: string;
-    };
-  };
-  
-  // Champs communs utiles pour plusieurs types
-  accessibility?: {
-    wheelchairAccessible?: boolean;
-    familyFriendly?: boolean;
-    petFriendly?: boolean;
-  };
-  
-  paymentOptions?: {
-    cash?: boolean;
-    creditCard?: boolean;
-    mobilePay?: boolean;
-    cryptoCurrency?: boolean;
-    acceptedCards?: string[]; // Visa, Mastercard, etc.
-  };
-  
-  // FAQ du partenaire
-  faq?: Array<{
-    question: string;
-    answer: string;
-  }>;
-}
+This template ships with OpenAI `gpt-4o` as the default. However, with the [AI SDK](https://sdk.vercel.ai/docs), you can switch LLM providers to [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://sdk.vercel.ai/providers/ai-sdk-providers) with just a few lines of code.
 
-// =============================
-// ATTRIBUTS SPÉCIFIQUES PAR CATÉGORIE
-// =============================
+<div id="youtube-onboarding-video">
 
-// Interface pour les attributs spécifiques à chaque catégorie
-export interface PartnerAttributes {
-  // Pour éviter d'avoir des champs vides, on utilise un Record dynamique
-  [key: string]: any;
-}
+<div align="left">
+  <h2>YouTube Onboarding Video</h2>
+   <h4>This video walks you through how to set up the ai chatbot with supabase from scratch. We will:</h4>
+  <ul style="text-align: left; display: inline-block;">
+    <li>Setup a new Supabase project using the CLI</li>
+    <li>Link it to our app</li>
+    <li>Setup environment variables</li>
+    <li>Run the DB migrations to configure the schema</li>
+  </ul>
+  <a href="https://youtu.be/YMEyNXP59Ss">
+    <img src="https://github.com/nolly-studio/ai-chatbot-supabase/blob/main/readme-video-thumbnail.png" width="85%" alt="YouTube Onboarding Video" />
+  </a>
+</div>
 
-// =============================
-// INTERFACE PRINCIPALE DU PARTENAIRE
-// =============================
+</div>
 
-export interface Partner extends BasePartner {
-  // Attributs spécifiques à la catégorie
-  attributes: PartnerAttributes;
-}
 
-// =============================
-// ATTRIBUTS SPÉCIFIQUES PRÉDEFINIS
-// =============================
+## Getting Started
 
-// HÉBERGEMENT
-export interface AccommodationAttributes extends PartnerAttributes {
-  accommodationType: "hotel" | "bungalow" | "villa" | "guesthouse" | "hostel";
-  rooms: Array<{
-    name?: string;
-    capacity: number;
-    bedType?: string;
-    pricePerNight: number;
-    pricePerWeek?: number;
-    pricePerMonth?: number;
-    amenities?: string[];
-    images?: string[];
-  }>;
-  facilities: string[]; // Piscine, Wifi, etc.
-  policies: {
-    checkIn: string;
-    checkOut: string;
-    cancellation?: string;
-    extraBed?: {
-      available: boolean;
-      fee?: number;
-    };
-    childrenPolicy?: string;
-    petsAllowed?: boolean;
-  };
-  includedServices?: string[];
-  nearbyAttractions?: string[];
-  distanceToBeach?: number; // En mètres
-  transferService?: boolean;
-  // Champs spécifiques pour certains types (optionnels)
-  propertyDetails?: {
-    size?: number; // m²
-    floors?: number;
-    viewType?: string;
-    yearBuilt?: number;
-    privatePool?: boolean;
-    privateGarden?: boolean;
-    kitchen?: boolean;
-    livingRoom?: boolean;
-    staff?: boolean;
-  };
-}
+### Quick Start Video Guide
 
-// RESTAURATION & BARS
-export interface FoodDrinkAttributes extends PartnerAttributes {
-  establishmentType: "restaurant" | "cafe" | "bar" | "beach_bar" | "food_truck" | "street_food";
-  cuisine: string[];
-  specialties?: string[];
-  menuHighlights?: string[];
-  diningOptions?: {
-    takeAway?: boolean;
-    delivery?: boolean;
-    reservation?: boolean;
-    privateEvents?: boolean;
-  };
-  atmosphere?: string[];
-  seating?: {
-    indoor?: boolean;
-    outdoor?: boolean;
-    beachfront?: boolean;
-    rooftop?: boolean;
-    capacity?: number;
-  };
-  dietaryOptions?: string[]; // Végétarien, Vegan, Sans Gluten, etc.
-  alcoholServed?: boolean;
-  specialEvents?: Array<{
-    name: string;
-    description?: string;
-    day: string;
-    time?: string;
-  }>;
-  happyHour?: {
-    available: boolean;
-    timeSlots?: string;
-    details?: string;
-  };
-}
+Watch our comprehensive onboarding video to quickly set up your development environment and understand the project structure: [Watch Tutorial](#)
 
-// LOISIRS & ACTIVITÉS
-export interface LeisureActivityAttributes extends PartnerAttributes {
-  activityType: string;
-  options: Array<{
-    name: string;
-    duration: string;
-    price: number;
-    description?: string;
-    difficulty?: "beginner" | "intermediate" | "advanced" | "all-levels";
-    minParticipants?: number;
-    maxParticipants?: number;
-    included?: string[];
-    excluded?: string[];
-    images?: string[];
-  }>;
-  equipment?: {
-    provided?: string[];
-    required?: string[];
-    rentAvailable?: boolean;
-    rentalPrices?: Record<string, number>;
-  };
-  bookingInfo: {
-    advanceBookingRequired?: boolean;
-    cancelPolicy?: string;
-    meetingPoint?: string;
-    pickupAvailable?: boolean;
-  };
-  seasonalAvailability?: string;
-  suitableFor?: string[]; // Familles, Couples, Solo, etc.
-  instructorLanguages?: string[];
-  certification?: string[];
-  insurance?: {
-    included: boolean;
-    details?: string;
-  };
-}
+### Prerequisites
 
-// TRANSPORT & MOBILITÉ
-export interface MobilityAttributes extends PartnerAttributes {
-  serviceType: "taxi" | "rental" | "transfer" | "tour";
-  vehicleTypes?: Array<{
-    type: string; // Scooter, Car, Boat, Bike, etc.
-    models?: Array<{
-      name: string;
-      capacity?: number;
-      pricePerHour?: number;
-      pricePerDay: number;
-      pricePerWeek?: number;
-      details?: Record<string, any>;
-      images?: string[];
-    }>;
-  }>;
-  rentalRequirements?: string[]; // Permis, Passeport, Dépôt, etc.
-  routes?: Array<{
-    from: string;
-    to: string;
-    distance?: string;
-    duration: string;
-    price: number;
-    frequency?: string;
-  }>;
-  services?: {
-    delivery?: boolean;
-    pickup?: boolean;
-    chauffeur?: boolean;
-    insurance?: boolean;
-    assistance?: boolean;
-  };
-  bookingOptions?: {
-    immediate?: boolean;
-    advance?: boolean;
-    onlineBooking?: boolean;
-    minAdvanceTime?: string;
-  };
-}
+Before you begin, ensure you have the following installed:
 
-// SANTÉ & URGENCES
-export interface HealthAttributes extends PartnerAttributes {
-  facilityType: "hospital" | "clinic" | "pharmacy" | "doctor" | "emergency";
-  specializations?: string[];
-  services: string[];
-  emergencyService?: boolean;
-  openHours: string;
-  doctors?: Array<{
-    name: string;
-    specialization: string;
-    languages: string[];
-    available: string;
-  }>;
-  insuranceAccepted?: string[];
-  paymentMethods: string[];
-  appointmentRequired?: boolean;
-  walkInAccepted?: boolean;
-  telehealth?: boolean;
-  medicalEquipment?: string[];
-  prescriptionService?: boolean;
-}
+- Node.js 18+
+- pnpm (`npm install -g pnpm`)
+- Git
+- A code editor (we recommend VS Code)
 
-// BIEN-ÊTRE & ESTHÉTIQUE
-export interface WellnessAttributes extends PartnerAttributes {
-  serviceType: "massage" | "spa" | "salon" | "yoga" | "fitness";
-  treatments?: Array<{
-    name: string;
-    duration: number; // En minutes
-    price: number;
-    description?: string;
-  }>;
-  packages?: Array<{
-    name: string;
-    treatments: string[];
-    duration: number;
-    price: number;
-    description?: string;
-  }>;
-  techniques?: string[];
-  products?: string[];
-  specialists?: Array<{
-    name: string;
-    expertise: string[];
-    languages: string[];
-  }>;
-  facilities?: string[];
-  bookingInfo: {
-    appointmentRequired: boolean;
-    walkInAccepted?: boolean;
-    homeService?: boolean;
-  };
-  giftCertificates?: boolean;
-}
+### Supabase Setup
 
-// IMMOBILIER & LOCATION
-export interface RealEstateAttributes extends PartnerAttributes {
-  serviceType: "agency" | "property_management" | "rental";
-  services: string[];
-  properties?: Array<{
-    type: string;
-    location: string;
-    bedrooms: number;
-    price: number;
-    available: boolean;
-    features?: string[];
-    imageUrl?: string;
-  }>;
-  specializations?: string[];
-  commission?: {
-    sale?: string;
-    rental?: string;
-    management?: string;
-  };
-  licenses?: string[];
-  featuredListings?: string[];
-  buyerServices?: string[];
-  sellerServices?: string[];
-}
+1. **Install the Supabase CLI**
+   Choose the installation method for your operating system:
 
-// =============================
-// HELPERS ET TYPE GUARDS
-// =============================
+   - Mac:
+     ```bash
+     brew install supabase/tap/supabase
+     ```
+   - Windows (PowerShell):
+     ```powershell
+     scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+     scoop install supabase
+     ```
+   - Linux:
+     ```bash
+     brew install supabase/tap/supabase
+     ```
+   - NPM/Bun:
+     ```bash
+     npx supabase <command>
+     ```
 
-export function isEstablishment(partner: Partner): boolean {
-  return partner.section === PartnerSection.ESTABLISHMENT;
-}
+2. **Create a Supabase Project**
 
-export function isService(partner: Partner): boolean {
-  return partner.section === PartnerSection.SERVICE;
-}
+   ```bash
+   # Create a new project
+   npx supabase projects create -i "ai-chatbot-supabase"
 
-export function isAccommodation(partner: Partner): partner is Partner & { attributes: AccommodationAttributes } {
-  return partner.mainCategory === EstablishmentCategory.ACCOMMODATION;
-}
+   # Note: Save the project ID and database password shown after creation
+   ```
 
-export function isFoodDrink(partner: Partner): partner is Partner & { attributes: FoodDrinkAttributes } {
-  return partner.mainCategory === EstablishmentCategory.FOOD_DRINK;
-}
+   > Your Organization ID can be found in the Supabase Dashboard URL after selecting an organization
 
-export function isLeisureActivity(partner: Partner): partner is Partner & { attributes: LeisureActivityAttributes } {
-  return partner.mainCategory === EstablishmentCategory.LEISURE;
-}
+3. **Link Your Project**
 
-export function isMobility(partner: Partner): partner is Partner & { attributes: MobilityAttributes } {
-  return partner.mainCategory === ServiceCategory.MOBILITY;
-}
+   ```bash
+   # Initialize Supabase configuration
+   npx supabase init
 
-export function isHealth(partner: Partner): partner is Partner & { attributes: HealthAttributes } {
-  return partner.mainCategory === ServiceCategory.HEALTH;
-}
+   # Link to your remote project
+   npx supabase link --project-ref your-project-id
+   ```
 
-export function isWellness(partner: Partner): partner is Partner & { attributes: WellnessAttributes } {
-  return partner.mainCategory === ServiceCategory.WELLNESS;
-}
+   You'll need your project ID and database password from step 2.
 
-export function isRealEstate(partner: Partner): partner is Partner & { attributes: RealEstateAttributes } {
-  return partner.mainCategory === ServiceCategory.REAL_ESTATE;
-}
+4. **Configure Environment Variables**
+   Create a `.env.local` file with the following variables:
 
-// =============================
-// EXEMPLES D'UTILISATION
-// =============================
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=<api-url>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+   ```
 
-// Exemple d'un hôtel
-const exampleHotel: Partner = {
-  id: "hotel-123",
-  name: "Coconut Beach Resort",
-  section: PartnerSection.ESTABLISHMENT,
-  mainCategory: EstablishmentCategory.ACCOMMODATION,
-  subcategory: PartnerSubcategory.HOTEL,
-  images: {
-    main: "/images/hotel-123-main.jpg",
-    gallery: ["/images/hotel-123-1.jpg", "/images/hotel-123-2.jpg"]
-  },
-  description: {
-    short: "Hôtel en bord de mer avec piscine et restaurants",
-    long: "Un magnifique complexe hôtelier situé directement sur la plage de Coconut Beach..."
-  },
-  location: {
-    address: "123 Coconut Beach Road, Koh Phangan",
-    coordinates: {
-      latitude: 9.7542,
-      longitude: 100.0376
-    },
-    area: "West Coast"
-  },
-  contact: {
-    phone: "+66 77 123 456",
-    email: "info@coconutbeachresort.com",
-    website: "www.coconutbeachresort.com"
-  },
-  hours: {
-    regularHours: "Check-in: 14:00, Check-out: 11:00",
-    open24h: true
-  },
-  rating: {
-    score: 4.5,
-    reviewCount: 128
-  },
-  tags: ["beach", "pool", "family-friendly", "restaurant", "wifi"],
-  prices: {
-    priceRange: "€€€",
-    currency: "THB"
-  },
-  features: ["Beachfront", "Swimming Pool", "Restaurant", "Free WiFi", "Airport Shuttle"],
-  languages: ["English", "Thai", "French", "German"],
-  createdAt: "2023-06-15T10:30:00Z",
-  updatedAt: "2023-12-20T14:15:00Z",
-  attributes: {
-    accommodationType: "hotel",
-    rooms: [
-      {
-        name: "Deluxe Sea View",
-        capacity: 2,
-        bedType: "King",
-        pricePerNight: 3500,
-        amenities: ["Air Conditioning", "Balcony", "Sea View", "Mini-bar"]
-      },
-      {
-        name: "Family Suite",
-        capacity: 4,
-        bedType: "King + Twin",
-        pricePerNight: 5500,
-        amenities: ["Air Conditioning", "Balcony", "Sea View", "Mini-bar", "Living Area"]
-      }
-    ],
-    facilities: ["Swimming Pool", "Restaurant", "Bar", "Spa", "Fitness Center", "Kids Club"],
-    policies: {
-      checkIn: "14:00",
-      checkOut: "11:00",
-      cancellation: "Free cancellation up to 3 days before arrival",
-      extraBed: {
-        available: true,
-        fee: 1000
-      },
-      childrenPolicy: "Children under 6 stay free",
-      petsAllowed: false
-    },
-    includedServices: ["Breakfast", "WiFi", "Beach Towels"],
-    nearbyAttractions: ["Coconut Beach", "Thong Sala Night Market"],
-    distanceToBeach: 0,
-    transferService: true
-  }
-};
+   > Find these values in your Supabase project dashboard under Project Settings > API
 
-// Exemple d'un restaurant
-const exampleRestaurant: Partner = {
-  id: "rest-456",
-  name: "Seaside Grill",
-  section: PartnerSection.ESTABLISHMENT,
-  mainCategory: EstablishmentCategory.FOOD_DRINK,
-  subcategory: PartnerSubcategory.RESTAURANT,
-  images: {
-    main: "/images/rest-456-main.jpg"
-  },
-  description: {
-    short: "Restaurant de fruits de mer en bord de plage",
-    long: "Dégustez les meilleurs fruits de mer de l'île avec une vue imprenable sur l'océan..."
-  },
-  location: {
-    address: "456 Sunset Beach, Koh Phangan",
-    coordinates: {
-      latitude: 9.7123,
-      longitude: 100.0234
-    },
-    area: "South Coast"
-  },
-  contact: {
-    phone: "+66 77 456 789",
-    social: {
-      facebook: "facebook.com/seasidegrillkp",
-      instagram: "instagram.com/seasidegrill"
-    }
-  },
-  hours: {
-    regularHours: "Daily: 12:00-22:00"
-  },
-  rating: {
-    score: 4.7,
-    reviewCount: 89
-  },
-  tags: ["seafood", "beach", "sunset", "cocktails"],
-  prices: {
-    priceRange: "€€"
-  },
-  features: ["Beachfront", "Live Music", "Cocktails", "Fresh Seafood"],
-  createdAt: "2023-07-22T08:45:00Z",
-  updatedAt: "2023-11-18T16:30:00Z",
-  attributes: {
-    establishmentType: "restaurant",
-    cuisine: ["Seafood", "Thai", "International"],
-    specialties: ["Grilled Fish", "Tom Yum Goong", "Coconut Curry"],
-    diningOptions: {
-      takeAway: true,
-      delivery: false,
-      reservation: true
-    },
-    atmosphere: ["Romantic", "Sunset View", "Beach"],
-    seating: {
-      indoor: true,
-      outdoor: true,
-      beachfront: true,
-      capacity: 60
-    },
-    dietaryOptions: ["Vegetarian Options", "Gluten-Free Options"],
-    alcoholServed: true,
-    specialEvents: [
-      {
-        name: "Seafood BBQ Night",
-        day: "Friday",
-        time: "18:00-22:00"
-      }
-    ],
-    happyHour: {
-      available: true,
-      timeSlots: "16:00-18:00",
-      details: "Buy 1 Get 1 on selected cocktails"
-    }
-  }
-};
+5. **Initialize Database Schema**
 
-// Exemple d'un service de location de scooters
-const exampleScooterRental: Partner = {
-  id: "scoot-789",
-  name: "Island Wheels",
-  section: PartnerSection.SERVICE,
-  mainCategory: ServiceCategory.MOBILITY,
-  subcategory: PartnerSubcategory.SCOOTER_RENTAL,
-  images: {
-    main: "/images/scoot-789-main.jpg",
-    gallery: ["/images/scoot-789-1.jpg", "/images/scoot-789-2.jpg"]
-  },
-  description: {
-    short: "Location de scooters fiables à des prix compétitifs",
-    long: "Explorez Koh Phangan en toute liberté avec nos scooters bien entretenus..."
-  },
-  location: {
-    address: "789 Main Road, Thong Sala, Koh Phangan",
-    coordinates: {
-      latitude: 9.7052,
-      longitude: 100.0230
-    },
-    area: "Thong Sala"
-  },
-  contact: {
-    phone: "+66 77 789 123",
-    email: "rent@islandwheels.com",
-    lineId: "islandwheels"
-  },
-  hours: {
-    regularHours: "Daily: 8:00-20:00"
-  },
-  rating: {
-    score: 4.3,
-    reviewCount: 56
-  },
-  tags: ["scooter", "rental", "mobility", "transport"],
-  prices: {
-    priceRange: "€",
-    currency: "THB"
-  },
-  features: ["Free Helmet", "Delivery Option", "Insurance", "New Models"],
-  languages: ["English", "Thai"],
-  createdAt: "2023-08-10T09:20:00Z",
-  updatedAt: "2023-12-05T11:40:00Z",
-  attributes: {
-    serviceType: "rental",
-    vehicleTypes: [
-      {
-        type: "Scooter",
-        models: [
-          {
-            name: "Honda Click 125cc",
-            capacity: 2,
-            pricePerDay: 250,
-            details: {
-              engineSize: "125cc",
-              fuelType: "Gasoline",
-              automatic: true
-            }
-          },
-          {
-            name: "Yamaha NMAX 155cc",
-            capacity: 2,
-            pricePerDay: 300,
-            details: {
-              engineSize: "155cc",
-              fuelType: "Gasoline",
-              automatic: true
-            }
-          }
-        ]
-      }
-    ],
-    rentalRequirements: ["Passport or Copy", "Driving License", "Deposit: 2000 THB"],
-    services: {
-      delivery: true,
-      pickup: true,
-      insurance: true,
-      assistance: true
-    },
-    bookingOptions: {
-      immediate: true,
-      advance: true,
-      onlineBooking: true
-    }
-  }
-};
+   ```bash
+   # Apply all migrations
+   supabase db push
+
+   # Verify the schema
+   supabase db reset --dry-run
+   ```
+
+### Local Development
+
+1. **Clone and Install**
+
+   ```bash
+   git clone https://github.com/your-username/ai-chatbot-supabase.git
+   cd ai-chatbot-supabase
+   pnpm install
+   ```
+
+2. **Start Development Server**
+
+   ```bash
+   pnpm dev
+   ```
+
+   The application will be available at [http://localhost:3000](http://localhost:3000)
+
+3. **Development Commands**
+   ```bash
+   pnpm build          # Build for production
+   pnpm start          # Start production server
+   pnpm lint          # Run ESLint
+   pnpm type-check    # Run TypeScript checks
+   ```
+
+### Troubleshooting
+
+Common issues and solutions:
+
+- **Supabase Connection Issues**
+
+  - Verify your environment variables are correctly set
+  - Check if the database is active in Supabase dashboard
+
+- **Build Errors**
+  - Clear `.next` folder: `rm -rf .next`
+  - Clean install dependencies: `pnpm clean-install`
+
+For more help, open an issue.
+
+## Deploy with Vercel
+
+### Prerequisites
+
+- A [Vercel account](https://vercel.com/signup)
+- A [Supabase account](https://supabase.com/dashboard/sign-in)
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+
+### Deployment Steps
+
+1. **Fork the Repository**
+
+   ```bash
+   https://github.com/your-username/ai-chatbot-supabase
+   ```
+
+2. **Configure Vercel Project**
+
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "New Project"
+   - Import your forked repository
+   - Select "Next.js" as the framework
+
+3. **Set Environment Variables**
+   In your Vercel project settings, add the following environment variables:
+
+```bash
+# Required
+NEXT_PUBLIC_SUPABASE_URL=           # From Supabase project settings
+NEXT_PUBLIC_SUPABASE_ANON_KEY=      # From Supabase project settings
+OPENAI_API_KEY=                     # Your OpenAI API key
+```
+
+4. **Configure Build Settings**
+   In your Vercel project settings:
+
+   - Build Command: `pnpm build`
+   - Output Directory: `.next`
+   - Install Command: `pnpm install`
+
+5. **Deploy**
+   - Click "Deploy"
+   - Vercel will automatically build and deploy your application
+
