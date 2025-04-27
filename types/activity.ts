@@ -76,12 +76,42 @@ export interface BaseActivityItem {
     familyFriendly?: boolean;
     petFriendly?: boolean;
   };
+  
+  // Category-specific activity data
+  activityData?: ActivityData;
 }
 
 // Food & Drink activities
 export interface FoodDrinkActivity extends BaseActivityItem {
   category: ActivityCategory.FOOD_DRINK;
-  cuisine: string[];
+}
+
+// Leisure activities
+export interface LeisureActivity extends BaseActivityItem {
+  category: ActivityCategory.LEISURE;
+}
+
+// Culture activities
+export interface CultureActivity extends BaseActivityItem {
+  category: ActivityCategory.CULTURE;
+}
+
+// Shopping activities
+export interface ShoppingActivity extends BaseActivityItem {
+  category: ActivityCategory.SHOPPING;
+}
+
+// Activity type (combined)
+export type Activity = 
+  | FoodDrinkActivity
+  | LeisureActivity
+  | CultureActivity
+  | ShoppingActivity;
+
+// Common ActivityData type with optional fields for all possible properties
+export interface ActivityData {
+  // Food & Drink
+  cuisine?: string[];
   specialties?: string[];
   takeAway?: boolean;
   delivery?: boolean;
@@ -91,29 +121,23 @@ export interface FoodDrinkActivity extends BaseActivityItem {
     time?: string;
   };
   dietaryOptions?: string[];
-  atmosphere: string[];
-}
-
-// Leisure activities
-export interface LeisureActivity extends BaseActivityItem {
-  category: ActivityCategory.LEISURE;
-  activityType: string;
-  activities: Array<{
+  atmosphere?: string[];
+  
+  // Leisure
+  activityType?: string;
+  activities?: Array<{
     name: string;
     duration: string;
     price: number;
     skillLevel?: string;
   }>;
-  equipmentIncluded: boolean;
-  bookingRequired: boolean;
+  equipmentIncluded?: boolean;
+  bookingRequired?: boolean;
   minimumAge?: number;
   weatherDependent?: boolean;
-}
-
-// Culture activities
-export interface CultureActivity extends BaseActivityItem {
-  category: ActivityCategory.CULTURE;
-  venueType: string;
+  
+  // Culture
+  venueType?: string;
   upcomingEvents?: Array<{
     name: string;
     date: string;
@@ -121,23 +145,16 @@ export interface CultureActivity extends BaseActivityItem {
   }>;
   workshopsAvailable?: boolean;
   photographyAllowed?: boolean;
-}
-
-// Shopping activities
-export interface ShoppingActivity extends BaseActivityItem {
-  category: ActivityCategory.SHOPPING;
-  productTypes: string[];
+  
+  // Shopping
+  productTypes?: string[];
   specialProducts?: string[];
   priceNegotiation?: boolean;
   localCrafts?: boolean;
-}
 
-// Activity type (combined)
-export type Activity = 
-  | FoodDrinkActivity
-  | LeisureActivity
-  | CultureActivity
-  | ShoppingActivity;
+  // Any other custom properties
+  [key: string]: any;
+}
 
 // Type Guards
 export function isFoodDrinkActivity(activity: Activity): activity is FoodDrinkActivity {

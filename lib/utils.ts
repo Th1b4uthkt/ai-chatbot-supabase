@@ -244,3 +244,45 @@ export function getMessageIdFromAnnotations(message: Message) {
 
   return annotation.messageIdFromServer;
 }
+
+export function formatDate(date: Date | string | number): string {
+  if (!date) return '';
+  
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(dateObj);
+}
+
+export function formatNumber(number: number, notation: 'compact' | 'standard' = 'standard'): string {
+  return new Intl.NumberFormat('en-US', {
+    notation,
+    compactDisplay: 'short',
+  }).format(number);
+}
+
+export function formatCurrency(amount: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export function getRelativeTimeString(
+  date: Date | number | string,
+  lang = navigator.language
+): string {
+  const timeMs = typeof date === 'number' ? date : new Date(date).getTime();
+  const deltaSeconds = Math.round((timeMs - Date.now()) / 1000);
+  const cutoffs = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity];
+  const units: Intl.RelativeTimeFormatUnit[] = ['second', 'minute', 'hour', 'day', 'week', 'month', 'year'];
+  const unitIndex = cutoffs.findIndex(cutoff => cutoff > Math.abs(deltaSeconds));
+  const divisor = unitIndex ? cutoffs[unitIndex - 1] : 1;
+  
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+  return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex]);
+}

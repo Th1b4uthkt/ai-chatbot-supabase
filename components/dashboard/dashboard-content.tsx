@@ -2,65 +2,39 @@
 
 import { useEffect, useState } from 'react';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
-import { UsersList } from '@/components/dashboard/users-list';
+import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
+import { LayoutDashboard } from 'lucide-react';
 
 export function DashboardContent() {
-  const [selectedTab, setSelectedTab] = useState('overview');
+  const [mounted, setMounted] = useState(false);
+
+  // Fix hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <DashboardHeader 
-        heading="Dashboard"
-        text="Manage your users and site content."
+        heading="Dashboard Overview"
+        text="Monitor platform performance with real-time data metrics."
       />
       
-      <Tabs 
-        defaultValue="overview" 
-        className="space-y-4"
-        value={selectedTab}
-        onValueChange={setSelectedTab}
-      >
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between space-y-0 pb-2">
-                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-              </div>
-              <div className="text-2xl font-bold">+254</div>
-              <p className="text-xs text-muted-foreground">+19% from last month</p>
-            </div>
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between space-y-0 pb-2">
-                <p className="text-sm font-medium text-muted-foreground">Events Created</p>
-              </div>
-              <div className="text-2xl font-bold">+42</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </div>
-            <div className="rounded-lg border bg-card p-6 shadow-sm">
-              <div className="flex items-center justify-between space-y-0 pb-2">
-                <p className="text-sm font-medium text-muted-foreground">Active Partners</p>
-              </div>
-              <div className="text-2xl font-bold">+24</div>
-              <p className="text-xs text-muted-foreground">+3% from last month</p>
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="users" className="space-y-4">
-          <UsersList />
-        </TabsContent>
-        <TabsContent value="content" className="space-y-4">
-          <div className="rounded-lg border p-8 text-center">
-            Content management coming soon
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 w-full border-b py-3">
+        <div className="w-full max-w-4xl mx-auto flex items-center gap-2 pl-4">
+          <LayoutDashboard className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-semibold">Platform Analytics</h2>
+        </div>
+      </div>
+
+      <div className="space-y-6 pt-2">
+        <DashboardOverview />
+      </div>
     </div>
   );
 } 

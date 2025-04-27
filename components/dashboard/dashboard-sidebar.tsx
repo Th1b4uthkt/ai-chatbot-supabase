@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart4, Home, LogOut, Settings, Users, Anchor, User, Calendar } from 'lucide-react';
+import { BarChart4, Home, LogOut, Settings, Users, Anchor, User, Calendar, Briefcase, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -44,6 +44,18 @@ export function DashboardSidebar() {
       icon: Users,
       href: '/dashboard/users',
       color: 'text-emerald-500',
+    },
+    {
+      title: 'Activities',
+      icon: MapPin,
+      href: '/dashboard/activities',
+      color: 'text-rose-500',
+    },
+    {
+      title: 'Services',
+      icon: Briefcase,
+      href: '/dashboard/services',
+      color: 'text-indigo-500',
     },
     {
       title: 'Events',
