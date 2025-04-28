@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       {
         hostname: 'phangan.events',
       },
+      {
+        hostname: 'res.cloudinary.com',
+      },
     ],
   },
   webpack: (config) => {

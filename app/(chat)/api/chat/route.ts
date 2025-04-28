@@ -226,6 +226,7 @@ export async function POST(request: Request) {
       tools: {
         getWeather: tools.getWeather,
         getEvents: tools.getEvents,
+        getActivitiesServices: tools.getActivitiesServices,
       },
       onFinish: async ({ responseMessages }) => {
         // Stocker les messages pour une utilisation ultérieure par les clients mobiles
