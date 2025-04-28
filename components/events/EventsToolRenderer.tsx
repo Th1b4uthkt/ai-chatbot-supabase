@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { Calendar, MapPin, Sparkles } from 'lucide-react';
 
 import { EventType } from '@/types/events';
 
@@ -20,6 +20,12 @@ export const EventsToolRenderer = ({ result }: EventsToolRendererProps) => {
   
   // Format the timeFrame nicely for display
   const timeFrame = result.timeFrame || 'upcoming';
+  // Use timeRangeDetails if available for better context
+  const timeRangeDetails = result.timeRangeDetails || '';
+  
+  // Get popular venues and suggestions if available
+  const popularVenues = result.popularVenues || [];
+  const suggestions = result.suggestions || [];
   
   // Check if this is a specific date query (starts with "on")
   const isSpecificDate = timeFrame.startsWith('on ');
@@ -44,17 +50,57 @@ export const EventsToolRenderer = ({ result }: EventsToolRendererProps) => {
         {isSpecificDate && <Calendar className="size-4 text-purple-700" />}
         <h3 className={`font-medium ${isSpecificDate ? 'text-purple-800' : 'text-blue-800'}`}>
           Events {timeFrame}
+          {timeRangeDetails && ` (${timeRangeDetails})`}
         </h3>
         <span className="text-sm text-gray-500 ml-auto">
           {events.length} {events.length === 1 ? 'event' : 'events'} found
         </span>
       </div>
       <div className="p-4 bg-white">
-        <EventsRenderer 
-          events={events} 
-          timeFrame={timeFrame} 
-          showHeader={false} 
-        />
+        {events.length > 0 ? (
+          <EventsRenderer 
+            events={events} 
+            timeFrame={timeFrame} 
+            showHeader={false} 
+          />
+        ) : (
+          <div className="p-4 text-center bg-gray-50 rounded-lg">
+            <p className="text-gray-600 mb-4">No events found for this time period.</p>
+            
+            {popularVenues.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <MapPin className="size-4 text-purple-700" />
+                  <h4 className="text-purple-800 font-medium">Popular venues to check</h4>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {popularVenues.map((venue: string) => (
+                    <span key={venue} className="inline-block px-3 py-1 bg-purple-50 text-purple-800 rounded-full text-sm border border-purple-100">
+                      {venue}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {suggestions.length > 0 && (
+              <div>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles className="size-4 text-blue-700" />
+                  <h4 className="text-blue-800 font-medium">Suggestions</h4>
+                </div>
+                <ul className="text-sm text-gray-600 space-y-2">
+                  {suggestions.map((suggestion: string, index: number) => (
+                    <li key={index} className="flex items-start">
+                      <span className="inline-block w-4 h-4 rounded-full bg-blue-100 text-blue-800 mr-2 flex-shrink-0 text-xs text-center leading-4 mt-0.5">•</span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

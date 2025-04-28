@@ -1,4 +1,4 @@
-import { Search, MapPin, Tag, Star } from 'lucide-react';
+import { Search, MapPin, Tag, Star, Car, Bike, Phone, Clock, CreditCard, Euro } from 'lucide-react';
 import Image from 'next/image';
 
 interface ActivityServiceItem {
@@ -35,6 +35,40 @@ const ActivityServiceItem = ({ item }: ActivityServiceItemProps) => {
   const ratingScore = typeof item.rating === 'object' ? item.rating.score : item.rating;
   const reviewCount = typeof item.rating === 'object' ? item.rating.reviewCount : undefined;
   
+  // Get appropriate icon for subcategory
+  const getSubcategoryIcon = () => {
+    if (item.subcategory === 'car_rental') return <Car className="size-4 mr-1" />;
+    if (item.subcategory === 'scooter_rental' || item.subcategory === 'bike_rental') return <Bike className="size-4 mr-1" />;
+    return <Tag className="size-4 mr-1" />;
+  };
+  
+  // Format service data if available
+  const renderServiceData = () => {
+    if (!item.serviceData) return null;
+    
+    // For car rentals, show available vehicles
+    if (item.subcategory === 'car_rental' && item.serviceData.vehicles) {
+      return (
+        <div className="mt-2 p-2 bg-blue-50 rounded-md">
+          <p className="text-sm font-medium text-blue-700 mb-1">Available Vehicles:</p>
+          <div className="space-y-1">
+            {item.serviceData.vehicles.slice(0, 3).map((vehicle: any, i: number) => (
+              <div key={i} className="flex justify-between text-xs">
+                <span>{vehicle.type}</span>
+                <span className="font-semibold">{vehicle.pricePerDay} THB/day</span>
+              </div>
+            ))}
+            {item.serviceData.vehicles.length > 3 && (
+              <p className="text-xs text-right text-gray-500">+{item.serviceData.vehicles.length - 3} more</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+  
   return (
     <div className="rounded-lg overflow-hidden shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 bg-white flex flex-col h-full">
       <div className="relative h-48 w-full">
@@ -65,10 +99,11 @@ const ActivityServiceItem = ({ item }: ActivityServiceItemProps) => {
       
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
-          <span className={`inline-block text-xs px-2 py-1 rounded ${
+          <span className={`inline-flex items-center text-xs px-2 py-1 rounded ${
             item.type === 'activity' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
           }`}>
-            {item.type === 'activity' ? 'Activity' : 'Service'}: {item.category}
+            {getSubcategoryIcon()}
+            {item.subcategory?.replace('_', ' ') || item.category}
           </span>
           {ratingScore && (
             <div className="flex items-center">
@@ -84,11 +119,27 @@ const ActivityServiceItem = ({ item }: ActivityServiceItemProps) => {
         <h3 className="font-bold text-lg mb-2">{item.name}</h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.shortDescription}</p>
         
+        {renderServiceData()}
+        
         <div className="mt-auto space-y-2 text-sm text-gray-600">
           {item.area && (
             <div className="flex items-center">
               <MapPin className="size-4 mr-2" />
               <span>{item.area}</span>
+            </div>
+          )}
+          
+          {item.hours && (
+            <div className="flex items-center">
+              <Clock className="size-4 mr-2" />
+              <span>{item.hours}</span>
+            </div>
+          )}
+          
+          {item.priceRange && (
+            <div className="flex items-center">
+              <Euro className="size-4 mr-2" />
+              <span>{item.priceRange}</span>
             </div>
           )}
           
@@ -114,6 +165,7 @@ const ActivityServiceItem = ({ item }: ActivityServiceItemProps) => {
 interface ToolSearchParams {
   type: 'activity' | 'service' | 'both';
   category: string;
+  subcategory: string;
   area: string;
   search: string;
   tags: string[];
@@ -159,6 +211,10 @@ export const ActivitiesServicesToolRenderer = ({ result }: ActivitiesServicesToo
     ? `in category "${searchParams.category}"` 
     : '';
     
+  const subcategoryLabel = searchParams.subcategory !== 'all'
+    ? `(${searchParams.subcategory.replace('_', ' ')})`
+    : '';
+    
   const areaLabel = searchParams.area !== 'all island' 
     ? `in ${searchParams.area}` 
     : '';
@@ -172,7 +228,7 @@ export const ActivitiesServicesToolRenderer = ({ result }: ActivitiesServicesToo
       <div className="p-3 flex items-center gap-2 bg-indigo-50 border-b border-indigo-100">
         <Search className="size-4 text-indigo-700" />
         <h3 className="font-medium text-indigo-800">
-          {typeLabel} {categoryLabel} {areaLabel} {searchLabel}
+          {typeLabel} {categoryLabel} {subcategoryLabel} {areaLabel} {searchLabel}
         </h3>
         <span className="text-sm text-gray-500 ml-auto">
           {count} {count === 1 ? 'result' : 'results'} found
