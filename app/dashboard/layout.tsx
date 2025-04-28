@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard | Phangan Pirate',

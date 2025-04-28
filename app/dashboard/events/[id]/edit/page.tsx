@@ -1,16 +1,16 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
-import { Button } from '@/components/ui/button';
 import { EventEditForm } from '@/components/dashboard/event-edit-form';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
 import { EventType } from '@/types/events';
 
 export default async function EditEventPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -90,7 +90,7 @@ export default async function EditEventPage({
           href={`/dashboard/events/${id}/view`}
           className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Event Details</span>
         </Link>
       </div>

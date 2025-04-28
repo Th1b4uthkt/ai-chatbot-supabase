@@ -1,24 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { X, Plus, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { X, Plus, Loader2 } from 'lucide-react';
-import { 
-  Activity, 
-  ActivityData,
-  getCategoryDisplayName,
-  getSubcategoryDisplayName 
-} from '@/types/activity';
-import { ActivityCategory, Subcategory, PriceIndicator } from '@/types/common';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
 import {
   Form,
   FormControl,
@@ -28,6 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -35,18 +35,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { 
+  Activity, 
+  ActivityData,
+  getCategoryDisplayName,
+  getSubcategoryDisplayName 
+} from '@/types/activity';
+import { ActivityCategory, Subcategory, PriceIndicator } from '@/types/common';
 
 // Form schema
 const formSchema = z.object({
@@ -133,10 +133,10 @@ function TagInput({ tags, setTags, placeholder = "Add tag..." }: TagInputProps) 
               type="button"
               variant="ghost"
               size="sm"
-              className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+              className="size-4 p-0 ml-1 hover:bg-transparent"
               onClick={() => removeTag(tag)}
             >
-              <X className="h-3 w-3" />
+              <X className="size-3" />
             </Button>
           </Badge>
         ))}
@@ -473,7 +473,7 @@ function LeisureFields({ data, onChange }: CategoryFieldsProps) {
             onClick={addActivity}
             className="flex items-center gap-1"
           >
-            <Plus className="h-4 w-4" /> Add Activity
+            <Plus className="size-4" /> Add Activity
           </Button>
         </div>
 
@@ -485,10 +485,10 @@ function LeisureFields({ data, onChange }: CategoryFieldsProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                  className="absolute right-2 top-2 size-8 text-muted-foreground hover:text-destructive"
                   onClick={() => removeActivity(index)}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                 </Button>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormItem>
@@ -667,7 +667,7 @@ function CultureFields({ data, onChange }: CategoryFieldsProps) {
             onClick={addEvent}
             className="flex items-center gap-1"
           >
-            <Plus className="h-4 w-4" /> Add Event
+            <Plus className="size-4" /> Add Event
           </Button>
         </div>
 
@@ -679,10 +679,10 @@ function CultureFields({ data, onChange }: CategoryFieldsProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 text-muted-foreground hover:text-destructive"
+                  className="absolute right-2 top-2 size-8 text-muted-foreground hover:text-destructive"
                   onClick={() => removeEvent(index)}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                 </Button>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormItem>
@@ -1408,9 +1408,11 @@ export function ActivityEditForm({ activity, onSuccess, redirectUrl }: ActivityE
         </Tabs>
         
         <div className="flex justify-end gap-2">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {activity ? 'Update Activity' : 'Create Activity'}
+          <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
+            {isSubmitting && (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            )}
+            {activity ? 'Save Changes' : 'Create Activity'}
           </Button>
         </div>
       </form>

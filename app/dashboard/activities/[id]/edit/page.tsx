@@ -1,17 +1,17 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
-import { Button } from '@/components/ui/button';
 import { ActivityEditForm } from '@/components/dashboard/activity-edit-form';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
 import { Activity } from '@/types/activity';
 import { ActivityCategory, Subcategory } from '@/types/common';
 
 export default async function EditActivityPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -104,7 +104,7 @@ export default async function EditActivityPage({
           href={`/dashboard/activities/${id}/view`}
           className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Activity Details</span>
         </Link>
       </div>

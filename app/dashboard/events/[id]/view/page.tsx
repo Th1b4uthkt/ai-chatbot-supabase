@@ -1,33 +1,24 @@
-import { redirect } from 'next/navigation';
+import { ArrowLeft, Ban, Calendar, Clock, Coffee, Edit, Globe, Info, Mail, MapPin, ParkingSquare, Phone, Repeat, Star, Tag, Ticket, Users, Wifi } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Edit, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  Tag,
-  Users,
-  Ticket,
-  Star,
-  Repeat,
-  Info
-} from 'lucide-react';
+import { redirect } from 'next/navigation';
+import React from 'react';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/server';
 import { EventType } from '@/types/events';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 
 // Format dates
 function formatDate(dateString?: string): string {
   if (!dateString) return 'Not set';
   try {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-GB');
   } catch (e) {
+    console.error('Error formatting date:', e);
     return dateString;
   }
 }
@@ -36,16 +27,32 @@ function formatDate(dateString?: string): string {
 function formatTime(dateString?: string): string {
   if (!dateString) return 'Not set';
   try {
-    return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   } catch (e) {
+    console.error('Error formatting time:', e);
     return dateString;
   }
 }
 
+// Define the type for a single ticket directly from its known structure
+type TicketItem = { 
+    name: string; 
+    price: string; 
+    description?: string; 
+}; 
+// Define the type for facilities based on EventType structure
+type FacilitiesType = EventType['facilities'];
+// Define the type for organizer based on EventType structure
+type OrganizerType = EventType['organizer'];
+
 export default async function EventViewPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -82,41 +89,81 @@ export default async function EventViewPage({
     redirect('/dashboard/events');
   }
   
-  // Parse nested JSON objects
-  const event = {
-    ...eventData,
-    // Create coordinates object from latitude/longitude
+  // Safely parse JSON and construct the event object with defaults
+  let facilitiesData: FacilitiesType = {};
+  try {
+      facilitiesData = typeof eventData.facilities === 'object' && eventData.facilities !== null 
+        ? eventData.facilities 
+        : typeof eventData.facilities === 'string' 
+        ? JSON.parse(eventData.facilities) 
+        : {};
+  } catch (e) { console.error("Failed to parse facilities JSON:", e); }
+
+  let ticketsData: EventType['tickets'] = { types: [] }; // Default to object with empty types array
+   try {
+      const parsedTickets = typeof eventData.tickets === 'object' && eventData.tickets !== null 
+        ? eventData.tickets 
+        : typeof eventData.tickets === 'string' 
+        ? JSON.parse(eventData.tickets) 
+        : {};
+      // Ensure parsedTickets has the correct structure, especially the 'types' array
+      ticketsData = {
+        url: parsedTickets.url,
+        availableCount: parsedTickets.availableCount,
+        types: Array.isArray(parsedTickets.types) ? parsedTickets.types : [] 
+      };
+  } catch (e) { console.error("Failed to parse tickets JSON:", e); }
+
+  const event: EventType = {
+    id: eventData.id,
+    title: eventData.title ?? '',
+    category: eventData.category ?? 'Uncategorized',
+    image: eventData.image ?? '', // Provide default image URL if needed
+    time: eventData.time ?? '',
+    location: eventData.location ?? 'Location not set',
+    rating: eventData.rating ?? 0,
+    reviews: eventData.reviews ?? 0,
+    price: eventData.price ?? 'Free',
+    description: eventData.description ?? '',
+    latitude: Number(eventData.latitude) || undefined, // Keep as number or undefined
+    longitude: Number(eventData.longitude) || undefined, // Keep as number or undefined
     coordinates: {
       latitude: Number(eventData.latitude) || 0,
       longitude: Number(eventData.longitude) || 0
     },
-    
-    // Create organizer object from separate fields
-    organizer: {
+    day: eventData.day ?? 0, // Assuming day exists and providing default
+    organizer_name: eventData.organizer_name,
+    organizer_image: eventData.organizer_image,
+    organizer_contact_email: eventData.organizer_contact_email,
+    organizer_contact_phone: eventData.organizer_contact_phone,
+    organizer_website: eventData.organizer_website,
+    organizer: { // Construct nested object
       name: eventData.organizer_name || '',
-      image: eventData.organizer_image || '',
-      contactEmail: eventData.organizer_contact_email || '',
-      contactPhone: eventData.organizer_contact_phone || '',
-      website: eventData.organizer_website || ''
+      image: eventData.organizer_image,
+      contactEmail: eventData.organizer_contact_email,
+      contactPhone: eventData.organizer_contact_phone,
+      website: eventData.organizer_website
     },
-    
-    // Handle facilities and tickets which are already JSON objects in the database
-    facilities: typeof eventData.facilities === 'object' ? eventData.facilities : 
-               typeof eventData.facilities === 'string' ? JSON.parse(eventData.facilities) : {},
-      
-    tickets: typeof eventData.tickets === 'object' ? eventData.tickets : 
-             typeof eventData.tickets === 'string' ? JSON.parse(eventData.tickets) : {},
-    
-    // Reconstruct recurrence object
-    recurrence: eventData.recurrence_pattern ? {
-      pattern: eventData.recurrence_pattern,
+    duration: eventData.duration,
+    recurrence_pattern: eventData.recurrence_pattern,
+    recurrence_custom_pattern: eventData.recurrence_custom_pattern,
+    recurrence_end_date: eventData.recurrence_end_date,
+    recurrence: eventData.recurrence_pattern ? { // Construct nested object
+      pattern: eventData.recurrence_pattern as NonNullable<EventType['recurrence']>['pattern'], // Use NonNullable to assure TS 'pattern' exists
       customPattern: eventData.recurrence_custom_pattern,
       endDate: eventData.recurrence_end_date
-    } : null,
-    
-    // Map attendee_count to attendeeCount for frontend consistency
-    attendeeCount: eventData.attendee_count
-  } as EventType;
+    } : undefined,
+    facilities: facilitiesData, // Use safely parsed data
+    tickets: ticketsData, // Use safely parsed data
+    tags: eventData.tags ?? [],
+    capacity: eventData.capacity,
+    attendee_count: eventData.attendee_count,
+    attendeeCount: eventData.attendee_count ?? 0, // Ensure it's always number
+    created_at: eventData.created_at,
+    updated_at: eventData.updated_at,
+    is_sponsored: eventData.is_sponsored,
+    sponsor_end_date: eventData.sponsor_end_date,
+  };
   
   // Get recurring pattern text representation
   const getRecurrenceText = () => {
@@ -142,7 +189,7 @@ export default async function EventViewPage({
     <div className="container max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
         <Link href="/dashboard/events" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Events</span>
         </Link>
       </div>
@@ -155,7 +202,7 @@ export default async function EventViewPage({
         
         <Link href={`/dashboard/events/${id}/edit`}>
           <Button>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="mr-2 size-4" />
             Edit Event
           </Button>
         </Link>
@@ -167,14 +214,16 @@ export default async function EventViewPage({
           <CardHeader className="pb-2">
             <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
               {event.image ? (
-                <img 
+                <Image 
                   src={event.image} 
                   alt={event.title}
-                  className="w-full h-full object-cover"
+                  layout="fill"
+                  objectFit="cover"
+                  className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Calendar className="h-16 w-16 text-muted-foreground/50" />
+                <div className="size-full bg-muted flex items-center justify-center">
+                  <Calendar className="size-16 text-muted-foreground/50" />
                 </div>
               )}
               <Badge className="absolute top-2 right-2 capitalize" variant="default">
@@ -186,7 +235,7 @@ export default async function EventViewPage({
                 <CardTitle className="text-xl">{event.title}</CardTitle>
                 {event.rating > 0 && (
                   <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                    <Star className="size-4 fill-amber-500 text-amber-500" />
                     <span className="font-medium">{event.rating.toFixed(1)}</span>
                     {event.reviews > 0 && (
                       <span className="text-xs text-muted-foreground">({event.reviews})</span>
@@ -204,7 +253,7 @@ export default async function EventViewPage({
           <CardContent className="pt-4">
             <div className="space-y-4">
               <div className="flex items-start gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <MapPin className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{event.location || 'No location set'}</div>
                   {event.coordinates && (
@@ -216,12 +265,13 @@ export default async function EventViewPage({
               </div>
               
               <div className="flex items-start gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <Calendar className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{formatDate(event.time)}</div>
                   {event.recurrence && event.recurrence.pattern !== 'once' && (
                     <div className="flex items-center mt-1">
                       <Badge variant="outline" className="text-xs">
+                        <Repeat className="mr-1 size-3" />
                         {getRecurrenceText()}
                       </Badge>
                       {event.recurrence.endDate && (
@@ -235,7 +285,7 @@ export default async function EventViewPage({
               </div>
               
               <div className="flex items-start gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <Clock className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{formatTime(event.time)}</div>
                   {event.duration && (
@@ -246,36 +296,25 @@ export default async function EventViewPage({
                 </div>
               </div>
               
-              {event.organizer && event.organizer.name && (
+              {/* Attendee Count Display - Render only if defined and > 0 */}
+              {(event.attendeeCount !== undefined && event.attendeeCount > 0) ? (
                 <div className="flex items-start gap-2 text-sm">
-                  <Users className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div>Organized by: {event.organizer.name}</div>
-                    {event.organizer.contactEmail && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Email: {event.organizer.contactEmail}
-                      </div>
-                    )}
-                    {event.organizer.contactPhone && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Phone: {event.organizer.contactPhone}
-                      </div>
-                    )}
-                  </div>
+                   <Users className="size-4 text-muted-foreground mt-0.5" />
+                   <div>{event.attendeeCount} Attendees</div>
                 </div>
-              )}
-              
+              ) : null}
+
               {event.tags && event.tags.length > 0 && (
-                <div className="flex items-start gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div className="flex flex-wrap gap-1">
-                    {event.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                 <div className="flex items-start gap-2 text-sm">
+                    <Tag className="size-4 text-muted-foreground mt-0.5" />
+                     <div className="flex flex-wrap gap-1.5">
+                       {event.tags.map((tag: string, index: number) => (
+                         <Badge key={index} variant="secondary" className="text-xs">
+                           {tag}
+                         </Badge>
+                       ))}
+                    </div>
+                 </div>
               )}
             </div>
           </CardContent>
@@ -283,11 +322,11 @@ export default async function EventViewPage({
           <CardFooter className="flex justify-between border-t pt-4">
             <div className="grid grid-cols-2 w-full gap-2 text-center">
               <div className="space-y-0.5">
-                <p className="text-lg font-medium">{event.capacity || '∞'}</p>
+                <p className="text-lg font-medium">{event.capacity ?? 'N/A'}</p>
                 <p className="text-xs text-muted-foreground">Capacity</p>
               </div>
               <div className="space-y-0.5">
-                <p className="text-lg font-medium">{event.attendeeCount || 0}</p>
+                <p className="text-lg font-medium">{event.attendeeCount}</p>
                 <p className="text-xs text-muted-foreground">Attendees</p>
               </div>
             </div>
@@ -299,6 +338,7 @@ export default async function EventViewPage({
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="w-full justify-start">
               <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="organizer">Organizer</TabsTrigger>
               <TabsTrigger value="tickets">Tickets</TabsTrigger>
               <TabsTrigger value="facilities">Facilities</TabsTrigger>
               <TabsTrigger value="recurrence">Recurrence</TabsTrigger>
@@ -311,8 +351,8 @@ export default async function EventViewPage({
                   <CardTitle className="text-lg">Event Description</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose max-w-none">
-                    <p className="whitespace-pre-wrap">{event.description || 'No description available.'}</p>
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <p className="whitespace-pre-wrap">{event.description || 'No description provided.'}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -388,7 +428,7 @@ export default async function EventViewPage({
                       
                       {event.tickets.availableCount !== undefined && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Ticket className="h-4 w-4 text-muted-foreground" />
+                          <Ticket className="size-4 text-muted-foreground" />
                           <span className="text-muted-foreground">
                             {event.tickets.availableCount} tickets available
                           </span>
@@ -398,7 +438,7 @@ export default async function EventViewPage({
                   ) : (
                     <div className="flex items-center justify-center h-40 bg-muted/50 rounded-md">
                       <div className="text-center">
-                        <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                        <Info className="size-8 text-muted-foreground/50 mx-auto mb-2" />
                         <p className="text-muted-foreground">No ticket information available</p>
                       </div>
                     </div>
@@ -453,7 +493,7 @@ export default async function EventViewPage({
                   ) : (
                     <div className="flex items-center justify-center h-40 bg-muted/50 rounded-md">
                       <div className="text-center">
-                        <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                        <Info className="size-8 text-muted-foreground/50 mx-auto mb-2" />
                         <p className="text-muted-foreground">No facility information available</p>
                       </div>
                     </div>
@@ -473,7 +513,7 @@ export default async function EventViewPage({
                   {event.recurrence ? (
                     <div className="space-y-6">
                       <div className="flex items-center gap-2">
-                        <Repeat className="h-5 w-5 text-primary" />
+                        <Repeat className="size-5 text-primary" />
                         <div className="text-lg font-medium">{getRecurrenceText()}</div>
                       </div>
                       
@@ -500,7 +540,7 @@ export default async function EventViewPage({
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Repeat className="h-5 w-5 text-muted-foreground" />
+                      <Repeat className="size-5 text-muted-foreground" />
                       <div className="text-lg">One-time event</div>
                     </div>
                   )}
@@ -518,9 +558,157 @@ export default async function EventViewPage({
 function FacilityItem({ title, available }: { title: string, available?: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-muted/30 rounded-md text-center">
-      <div className={`h-3 w-3 rounded-full mb-2 ${available ? 'bg-green-500' : 'bg-red-500'}`}></div>
+      <div className={`size-3 rounded-full mb-2 ${available === true ? 'bg-green-500' : available === false ? 'bg-red-500' : 'bg-gray-400'}`}></div>
       <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground">{available ? 'Available' : 'Not available'}</p>
+      <p className="text-xs text-muted-foreground">{available === true ? 'Available' : available === false ? 'Not available' : 'Unknown'}</p>
     </div>
   );
-} 
+}
+
+// Helper component for Organizer Info
+function OrganizerInfo({ organizer }: { organizer: OrganizerType }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Organizer</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex items-center gap-3">
+          {organizer.image ? (
+            <Image 
+              src={organizer.image} 
+              alt={organizer.name || 'Organizer'} 
+              width={40} 
+              height={40} 
+              className="size-10 rounded-full object-cover" 
+            />
+          ) : (
+            <div className="size-10 rounded-full bg-muted flex items-center justify-center">
+              <Users className="size-5 text-muted-foreground" />
+            </div>
+          )}
+          <span className="font-medium">{organizer.name || 'N/A'}</span>
+        </div>
+        {organizer.contactEmail && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Mail className="size-4" />
+            <a href={`mailto:${organizer.contactEmail}`} className="hover:underline">{organizer.contactEmail}</a>
+          </div>
+        )}
+        {organizer.contactPhone && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="size-4" />
+            <span>{organizer.contactPhone}</span>
+          </div>
+        )}
+        {organizer.website && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Globe className="size-4" />
+            <a 
+              href={organizer.website.startsWith('http') ? organizer.website : `https://${organizer.website}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:underline"
+            >
+              {organizer.website}
+            </a>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Helper component for Ticket Info
+function TicketInfoSection({ tickets }: { tickets?: EventType['tickets']}) {
+  if (!tickets || !tickets.types || tickets.types.length === 0) {
+    return <p className="text-sm text-muted-foreground p-4 text-center">Ticket information not available.</p>;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Tickets</CardTitle>
+        {tickets.url && (
+          <CardDescription>
+            <a 
+              href={tickets.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-600 hover:underline"
+            >
+              Purchase Tickets Online
+            </a>
+          </CardDescription>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {tickets.types.map((ticket: TicketItem, index: number) => (
+          <div key={index} className="flex justify-between items-center text-sm">
+            <span className="font-medium">{ticket.name}</span>
+            <div className="text-right">
+              <span className="text-primary font-semibold">
+                {ticket.price}
+              </span>
+            </div>
+          </div>
+        ))}
+        {tickets.availableCount !== undefined && (
+          <div className="flex items-center gap-2 text-sm pt-3 border-t">
+            <Ticket className="size-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {tickets.availableCount} tickets available
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Helper component for Facilities
+function FacilitiesSection({ facilities }: { facilities?: FacilitiesType }) {
+  if (!facilities || Object.keys(facilities).length === 0) {
+    return <p className="text-sm text-muted-foreground p-4 text-center">Facility information not available.</p>;
+  }
+  
+  // Get keys that are present and true/false in the facilities object
+  const availableFacilities = Object.entries(facilities).filter(([key]) => key in facilityIcons);
+
+  if (availableFacilities.length === 0) {
+      return <p className="text-sm text-muted-foreground p-4 text-center">No specified facilities found.</p>;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Facilities</CardTitle>
+      </CardHeader>
+      <CardContent className="grid grid-cols-2 gap-x-4 gap-y-2">
+        {availableFacilities.map(([key, available]: [string, boolean | undefined]) => {
+          const title = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+          const Icon = facilityIcons[key] || Ban;
+          
+          return (
+            <div key={key} className="flex items-center gap-2 text-sm">
+              <Icon className={`size-4 ${available ? 'text-green-600' : 'text-muted-foreground'}`} />
+              <span>{title} {available === false ? '(N/A)' : ''}</span>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Define facilityIcons with explicit Record type
+const facilityIcons: Record<keyof FacilitiesType | string, React.ElementType> = {
+  parking: ParkingSquare,
+  atm: Users, // Placeholder - needs specific icon
+  foodAvailable: Coffee,
+  toilets: Users, // Placeholder
+  wheelchair: Users, // Placeholder
+  wifi: Wifi,
+  petFriendly: Users, // Placeholder
+  childFriendly: Users // Placeholder
+}; 

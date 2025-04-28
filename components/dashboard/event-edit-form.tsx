@@ -1,10 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -12,9 +9,16 @@ import {
   Loader2,
   MapPin,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-import { EventType } from '@/types/events';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -25,19 +29,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { EventType } from '@/types/events';
 
 // Define the form schema using Zod
 const formSchema = z.object({
@@ -146,7 +146,7 @@ function TagInput({ tags, setTags, placeholder = "Add tag..." }: TagInputProps) 
             <button 
               type="button" 
               onClick={() => removeTag(tag)}
-              className="text-xs hover:bg-gray-200 rounded-full w-4 h-4 inline-flex items-center justify-center"
+              className="text-xs hover:bg-gray-200 rounded-full size-4 inline-flex items-center justify-center"
             >
               <span className="sr-only">Remove</span>
               ×
@@ -522,7 +522,7 @@ export function EventEditForm({ event, onSuccess, redirectUrl }: EventEditFormPr
                             ) : (
                               <span>Select date and time</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="mr-2 size-4" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -714,7 +714,7 @@ export function EventEditForm({ event, onSuccess, redirectUrl }: EventEditFormPr
                                   ) : (
                                     <span>Select end date</span>
                                   )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  <Clock className="mr-2 size-4" />
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
@@ -1056,12 +1056,12 @@ export function EventEditForm({ event, onSuccess, redirectUrl }: EventEditFormPr
             <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   {event ? 'Updating...' : 'Creating...'}
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
+                  <Save className="mr-2 size-4" />
                   {event ? 'Update Event' : 'Create Event'}
                 </>
               )}

@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 export default async function UserPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   // Next.js 15 requires awaiting params
   const { id } = await params;

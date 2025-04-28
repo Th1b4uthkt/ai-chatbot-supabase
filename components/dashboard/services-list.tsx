@@ -1,9 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
+import { 
   ColumnDef,
   ColumnFiltersState,
   SortingState,
@@ -16,24 +13,28 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { 
-  Edit, 
-  Trash,
-  Search,
-  MapPin,
-  Tag,
-  CircleEllipsis,
-  Plus,
-  Star,
-  Clock,
   ArrowUpDown,
-  Eye,
   Briefcase,
-  Building
+  Building,
+  CircleEllipsis,
+  Clock,
+  Edit, 
+  Eye,
+  MapPin,
+  Plus,
+  Search,
+  Star,
+  Tag,
+  Trash
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-import { ServiceType, getCategoryDisplayName, getSubcategoryDisplayName } from '@/types/services';
-import { ServiceCategory, Subcategory } from '@/types/common';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -44,6 +45,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -52,18 +60,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
+import { ItemType, PriceIndicator, ServiceCategory, Subcategory } from '@/types/common';
+import { ServiceType, getCategoryDisplayName, getSubcategoryDisplayName } from '@/types/services';
 
 export function ServicesList() {
   const [services, setServices] = useState<ServiceType[]>([]);
@@ -136,32 +137,47 @@ export function ServicesList() {
           return {
             id: item.id,
             name: item.name,
-            type: item.type,
-            category: serviceDetails.category,
-            subcategory: serviceDetails.subcategory,
-            mainImage: item.main_image,
-            galleryImages: item.gallery_images,
-            shortDescription: item.short_description,
-            longDescription: item.long_description,
-            address: item.address,
-            coordinates: item.coordinates,
-            area: item.area,
-            contactInfo: item.contact_info,
-            hours: item.hours,
-            open24h: item.open_24h,
-            rating: item.rating,
+            type: ItemType.SERVICE,
+            category: serviceDetails.category as ServiceCategory,
+            subcategory: serviceDetails.subcategory as Subcategory,
+            mainImage: item.main_image ?? '',
+            galleryImages: item.gallery_images || undefined,
+            shortDescription: item.short_description ?? '',
+            longDescription: item.long_description ?? '',
+            address: item.address ?? '',
+            coordinates: item.coordinates as { latitude: number; longitude: number; } | undefined,
+            area: item.area || undefined,
+            contactInfo: item.contact_info as { 
+              phone?: string; 
+              email?: string; 
+              website?: string; 
+              lineId?: string; 
+              facebook?: string; 
+              instagram?: string; 
+            } || {}, 
+            hours: (item.hours as string) ?? '',
+            open24h: item.open_24h || undefined,
+            rating: item.rating ? { score: Number(item.rating), reviewCount: 0 } : undefined,
             tags: item.tags || [],
-            priceRange: item.price_range,
-            currency: item.currency,
+            priceRange: (item.price_range as PriceIndicator) ?? PriceIndicator.VARIES,
+            currency: item.currency || undefined,
             features: item.features || [],
-            languages: item.languages,
-            updatedAt: item.updated_at,
-            isSponsored: item.is_sponsored,
-            isFeatured: item.is_featured,
-            paymentMethods: item.payment_methods,
-            accessibility: item.accessibility,
+            languages: item.languages || undefined,
+            updatedAt: item.updated_at ?? '',
+            isSponsored: item.is_sponsored || undefined,
+            isFeatured: item.is_featured || undefined,
+            paymentMethods: item.payment_methods as { 
+              cash?: boolean; 
+              card?: boolean; 
+              mobilePay?: boolean; 
+            } | undefined,
+            accessibility: item.accessibility as { 
+              wheelchairAccessible?: boolean; 
+              familyFriendly?: boolean; 
+              petFriendly?: boolean; 
+            } | undefined,
             serviceData: serviceDetails.service_data
-          } as ServiceType;
+          };
         });
 
         // Filter out any null entries and then extract unique categories
@@ -183,7 +199,7 @@ export function ServicesList() {
     };
 
     fetchServices();
-  }, [toast]);
+  }, [toast, supabase]);
 
   // Get category badge variant
   const getCategoryVariant = (category?: ServiceCategory) => {
@@ -237,7 +253,7 @@ export function ServicesList() {
           className="font-medium"
         >
           Service
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       ),
       cell: ({ row }) => {
@@ -247,16 +263,18 @@ export function ServicesList() {
             className="flex items-center gap-3 cursor-pointer py-1.5 max-w-md"
             onClick={() => router.push(`/dashboard/services/${service.id}/view`)}
           >
-            <div className="relative flex-shrink-0 h-12 w-12">
+            <div className="relative size-12 shrink-0">
               {service.mainImage ? (
-                <img
+                <Image
                   src={service.mainImage}
                   alt={`${service.name} thumbnail`}
-                  className="w-12 h-12 rounded-md object-cover"
+                  width={48}
+                  height={48}
+                  className="rounded-md object-cover"
                 />
               ) : (
-                <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
-                  <Building className="h-6 w-6 text-muted-foreground/60" />
+                <div className="size-12 bg-muted rounded-md flex items-center justify-center">
+                  <Briefcase className="size-6 text-muted-foreground" />
                 </div>
               )}
             </div>
@@ -286,7 +304,11 @@ export function ServicesList() {
       header: 'Category',
       cell: ({ row }) => {
         const category = row.getValue('category') as ServiceCategory;
-        return <div>{category ? getCategoryDisplayName(category) : 'Uncategorized'}</div>;
+        return (
+          <Badge variant={getCategoryVariant(category)} className="text-xs">
+            {category ? getCategoryDisplayName(category) : 'Uncategorized'}
+          </Badge>
+        );
       },
       enableHiding: true,
     },
@@ -306,7 +328,7 @@ export function ServicesList() {
       accessorKey: 'address',
       header: () => (
         <div className="flex items-center gap-2">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <MapPin className="size-3.5 text-muted-foreground/70" />
           <span>Location</span>
         </div>
       ),
@@ -325,7 +347,7 @@ export function ServicesList() {
       accessorKey: 'rating',
       header: () => (
         <div className="flex items-center gap-2">
-          <Star className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <Star className="size-3.5 text-muted-foreground/70" />
           <span>Rating</span>
         </div>
       ),
@@ -395,9 +417,9 @@ export function ServicesList() {
           <TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="size-8">
                   <span className="sr-only">Open menu</span>
-                  <CircleEllipsis className="h-4 w-4" />
+                  <CircleEllipsis className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -406,14 +428,14 @@ export function ServicesList() {
                   onClick={() => router.push(`/dashboard/services/${service.id}/view`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="size-4" />
                   View Details
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => router.push(`/dashboard/services/${service.id}/edit`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="size-4" />
                   Edit Service
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -430,7 +452,7 @@ export function ServicesList() {
                       onClick={handleDelete}
                       className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash className="size-4" />
                       Delete Service
                     </DropdownMenuItem>
                   </TooltipTrigger>
@@ -471,7 +493,7 @@ export function ServicesList() {
         <CardContent className="flex items-center justify-center p-10">
           <div className="text-center space-y-3">
             <div className="flex justify-center">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+              <div className="animate-spin size-8 border-2 border-primary border-t-transparent rounded-full" />
             </div>
             <p className="text-muted-foreground">Loading services...</p>
           </div>
@@ -485,7 +507,7 @@ export function ServicesList() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder="Search services..."
               value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
@@ -522,7 +544,7 @@ export function ServicesList() {
         
         <Link href="/dashboard/services/create">
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             New Service
           </Button>
         </Link>

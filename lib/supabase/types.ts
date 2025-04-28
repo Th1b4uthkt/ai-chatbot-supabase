@@ -102,6 +102,155 @@ export interface Database {
           }
         ];
       };
+      base_items: {
+        Row: {
+          id: string;
+          name: string;
+          type: string;
+          short_description: string | null;
+          long_description: string | null;
+          main_image: string | null;
+          gallery_images: string[] | null;
+          address: string | null;
+          coordinates: Json | null;
+          area: string | null;
+          contact_info: Json | null;
+          hours: Json | null;
+          open_24h: boolean | null;
+          rating: number | null;
+          tags: string[] | null;
+          price_range: string | null;
+          currency: string | null;
+          features: string[] | null;
+          languages: string[] | null;
+          updated_at: string | null;
+          is_sponsored: boolean | null;
+          is_featured: boolean | null;
+          payment_methods: Json | null;
+          accessibility: Json | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          type: string;
+          short_description?: string | null;
+          long_description?: string | null;
+          main_image?: string | null;
+          gallery_images?: string[] | null;
+          address?: string | null;
+          coordinates?: Json | null;
+          area?: string | null;
+          contact_info?: Json | null;
+          hours?: Json | null;
+          open_24h?: boolean | null;
+          rating?: number | null;
+          tags?: string[] | null;
+          price_range?: string | null;
+          currency?: string | null;
+          features?: string[] | null;
+          languages?: string[] | null;
+          updated_at?: string | null;
+          is_sponsored?: boolean | null;
+          is_featured?: boolean | null;
+          payment_methods?: Json | null;
+          accessibility?: Json | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          type?: string;
+          short_description?: string | null;
+          long_description?: string | null;
+          main_image?: string | null;
+          gallery_images?: string[] | null;
+          address?: string | null;
+          coordinates?: Json | null;
+          area?: string | null;
+          contact_info?: Json | null;
+          hours?: Json | null;
+          open_24h?: boolean | null;
+          rating?: number | null;
+          tags?: string[] | null;
+          price_range?: string | null;
+          currency?: string | null;
+          features?: string[] | null;
+          languages?: string[] | null;
+          updated_at?: string | null;
+          is_sponsored?: boolean | null;
+          is_featured?: boolean | null;
+          payment_methods?: Json | null;
+          accessibility?: Json | null;
+        };
+        Relationships: [];
+      };
+      activities: {
+        Row: {
+          id: string;
+          category: string;
+          subcategory: string | null;
+          activity_data: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          category: string;
+          subcategory?: string | null;
+          activity_data?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          subcategory?: string | null;
+          activity_data?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activities_id_fkey";
+            columns: ["id"];
+            referencedRelation: "base_items";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      services: {
+        Row: {
+          id: string;
+          category: string;
+          subcategory: string | null;
+          service_data: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          category: string;
+          subcategory?: string | null;
+          service_data?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: string;
+          subcategory?: string | null;
+          service_data?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "services_id_fkey";
+            columns: ["id"];
+            referencedRelation: "base_items";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       events: {
         Row: {
           id: string;

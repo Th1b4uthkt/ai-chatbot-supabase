@@ -1,33 +1,36 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Edit, 
-  MapPin, 
-  Clock, 
-  Tag,
-  Star,
-  Info,
-  Mail,
-  Phone,
-  Globe,
+import {
+  ArrowLeft,
   Building,
-  Languages
+  CheckCircle,
+  Clock,
+  Edit,
+  Globe,
+  Info,
+  Languages,
+  Mail,
+  MapPin,
+  Phone,
+  Star,
+  Tag,
+  XCircle
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
-import { ServiceType, getCategoryDisplayName, getSubcategoryDisplayName } from '@/types/services';
-import { ServiceCategory, Subcategory, PriceIndicator } from '@/types/common';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createClient } from '@/lib/supabase/server';
+import { ServiceCategory, Subcategory, PriceIndicator } from '@/types/common';
+import { ServiceType, getCategoryDisplayName, getSubcategoryDisplayName } from '@/types/services';
 
 export default async function ServiceViewPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -117,7 +120,7 @@ export default async function ServiceViewPage({
     <div className="container max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
         <Link href="/dashboard/services" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Services</span>
         </Link>
       </div>
@@ -130,7 +133,7 @@ export default async function ServiceViewPage({
         
         <Link href={`/dashboard/services/${id}/edit`}>
           <Button>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="mr-2 size-4" />
             Edit Service
           </Button>
         </Link>
@@ -142,14 +145,16 @@ export default async function ServiceViewPage({
           <CardHeader className="pb-2">
             <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
               {service.mainImage ? (
-                <img 
+                <Image
                   src={service.mainImage} 
                   alt={service.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="size-full"
                 />
               ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Building className="h-16 w-16 text-muted-foreground/50" />
+                <div className="size-full bg-muted flex items-center justify-center">
+                  <Building className="size-16 text-muted-foreground/50" />
                 </div>
               )}
               <Badge className="absolute top-2 right-2 capitalize" variant="default">
@@ -161,7 +166,7 @@ export default async function ServiceViewPage({
                 <CardTitle className="text-xl">{service.name}</CardTitle>
                 {service.rating && service.rating.score > 0 && (
                   <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                    <Star className="size-4 fill-amber-500 text-amber-500" />
                     <span className="font-medium">{service.rating.score.toFixed(1)}</span>
                     {service.rating.reviewCount > 0 && (
                       <span className="text-xs text-muted-foreground">({service.rating.reviewCount})</span>
@@ -181,7 +186,7 @@ export default async function ServiceViewPage({
           <CardContent className="pt-4">
             <div className="space-y-4">
               <div className="flex items-start gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <MapPin className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{service.address || 'No location set'}</div>
                   {service.coordinates && (
@@ -198,7 +203,7 @@ export default async function ServiceViewPage({
               </div>
               
               <div className="flex items-start gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <Clock className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{service.hours || 'Hours not specified'}</div>
                   {service.open24h && (
@@ -211,23 +216,23 @@ export default async function ServiceViewPage({
               
               {service.contactInfo && (
                 <div className="flex items-start gap-2 text-sm">
-                  <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <Info className="size-4 text-muted-foreground mt-0.5" />
                   <div className="space-y-1">
                     {service.contactInfo.phone && (
                       <div className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" /> 
+                        <Phone className="size-3" /> 
                         <span>{service.contactInfo.phone}</span>
                       </div>
                     )}
                     {service.contactInfo.email && (
                       <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> 
+                        <Mail className="size-3" /> 
                         <span>{service.contactInfo.email}</span>
                       </div>
                     )}
                     {service.contactInfo.website && (
                       <div className="flex items-center gap-1">
-                        <Globe className="h-3 w-3" /> 
+                        <Globe className="size-3" /> 
                         <a href={service.contactInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                           Website
                         </a>
@@ -239,7 +244,7 @@ export default async function ServiceViewPage({
               
               {service.tags && service.tags.length > 0 && (
                 <div className="flex items-start gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <Tag className="size-4 text-muted-foreground mt-0.5" />
                   <div className="flex flex-wrap gap-1">
                     {service.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
@@ -263,7 +268,7 @@ export default async function ServiceViewPage({
                 {service.languages && service.languages.length > 0 && (
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-1">
-                      <Languages className="h-4 w-4 text-muted-foreground" />
+                      <Languages className="size-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Languages:</span>
                     </div>
                     <div className="text-sm">
@@ -324,7 +329,7 @@ export default async function ServiceViewPage({
                           key={index} 
                           className="bg-muted/40 p-3 rounded-md text-sm flex items-center gap-2"
                         >
-                          <div className="h-2 w-2 rounded-full bg-primary"></div>
+                          <div className="size-2 rounded-full bg-primary"></div>
                           <span>{feature}</span>
                         </div>
                       ))}
@@ -332,7 +337,7 @@ export default async function ServiceViewPage({
                   ) : (
                     <div className="flex items-center justify-center h-40 bg-muted/30 rounded-md">
                       <div className="text-center">
-                        <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+                        <Info className="size-8 mx-auto mb-2" />
                         <p className="text-muted-foreground">No features specified</p>
                       </div>
                     </div>
@@ -407,10 +412,15 @@ export default async function ServiceViewPage({
 // Component for accessibility/feature items
 function AccessibilityItem({ title, available }: { title: string, available?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-muted/30 rounded-md text-center">
-      <div className={`h-3 w-3 rounded-full mb-2 ${available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground">{available ? 'Available' : 'Not available'}</p>
+    <div className="flex items-center gap-2 text-sm">
+      {available === true ? (
+        <CheckCircle className="size-4 text-green-600" />
+      ) : available === false ? (
+        <XCircle className="size-4 text-red-600" />
+      ) : (
+        <span className="size-4 inline-block"></span> // Placeholder if undefined
+      )}
+      <span>{title}</span>
     </div>
   );
 }
@@ -540,7 +550,7 @@ function renderCategorySpecificInfo(service: ServiceType) {
                     <p className="text-sm text-muted-foreground mb-1">{specialist.specialization}</p>
                     {specialist.languages && (
                       <div className="flex items-center gap-1 text-xs">
-                        <Languages className="h-3 w-3" />
+                        <Languages className="size-3" />
                         <span>{specialist.languages.join(', ')}</span>
                       </div>
                     )}
@@ -719,7 +729,7 @@ function renderCategorySpecificInfo(service: ServiceType) {
       return (
         <div className="flex items-center justify-center h-40 bg-muted/30 rounded-md">
           <div className="text-center">
-            <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
+            <Info className="size-8 mx-auto mb-2" />
             <p className="text-muted-foreground">No specific information available for this category</p>
           </div>
         </div>

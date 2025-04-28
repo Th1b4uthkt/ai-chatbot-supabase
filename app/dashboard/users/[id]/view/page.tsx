@@ -1,26 +1,27 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Edit, 
-  UserCog, 
-  MapPin, 
-  Calendar, 
-  Mail, 
-  AtSign, 
-  Globe, 
-  Shield, 
-  CreditCard 
+import {
+  ArrowLeft,
+  AtSign,
+  Calendar,
+  CreditCard,
+  Edit,
+  Globe,
+  Mail,
+  MapPin,
+  Shield,
+  UserCog
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { ProfileType, AchievementItem, ReviewItem, ActivityItem, PaymentCard } from '@/types/profile';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createClient } from '@/lib/supabase/server';
+import { ProfileType, AchievementItem, ReviewItem, ActivityItem, PaymentCard } from '@/types/profile';
 
 // Format dates
 function formatDate(dateString?: string): string {
@@ -35,7 +36,7 @@ function formatDate(dateString?: string): string {
 export default async function UserViewPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -79,7 +80,7 @@ export default async function UserViewPage({
     <div className="container max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
         <Link href="/dashboard/users" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Users</span>
         </Link>
       </div>
@@ -92,7 +93,7 @@ export default async function UserViewPage({
         
         <Link href={`/dashboard/users/${id}/edit`}>
           <Button>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="mr-2 size-4" />
             Edit Profile
           </Button>
         </Link>
@@ -104,14 +105,16 @@ export default async function UserViewPage({
           <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
             <div className="relative">
               {profile.avatar ? (
-                <img 
+                <Image 
                   src={profile.avatar} 
                   alt={`${profile.name}'s avatar`} 
-                  className="w-24 h-24 rounded-xl object-cover border-4 border-background shadow-md"
+                  width={96}
+                  height={96}
+                  className="rounded-xl object-cover border-4 border-background shadow-md"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-xl bg-muted flex items-center justify-center border-4 border-background shadow-md">
-                  <UserCog className="h-12 w-12 text-muted-foreground/50" />
+                <div className="size-24 rounded-xl bg-muted flex items-center justify-center border-4 border-background shadow-md">
+                  <UserCog className="size-12 text-muted-foreground/50" />
                 </div>
               )}
               {userProfile.is_admin && (
@@ -138,38 +141,38 @@ export default async function UserViewPage({
           <CardContent className="pt-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Mail className="size-4 text-muted-foreground" />
                 <span>{profile.email || 'No email set'}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
-                <AtSign className="h-4 w-4 text-muted-foreground" />
+                <AtSign className="size-4 text-muted-foreground" />
                 <span>{profile.username || 'No username set'}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <MapPin className="size-4 text-muted-foreground" />
                 <span>{profile.location || 'No location set'}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="size-4 text-muted-foreground" />
                 <span>Joined {formatDate(profile.joinDate)}</span>
               </div>
               
               <div className="flex items-center gap-2 text-sm">
-                <Globe className="h-4 w-4 text-muted-foreground" />
+                <Globe className="size-4 text-muted-foreground" />
                 <span>{profile.language || 'No language set'}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
-                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Shield className="size-4 text-muted-foreground" />
                 <span>{userProfile.is_admin ? 'Administrator' : 'Regular User'}</span>
               </div>
               
               {profile.membershipTier && (
                 <div className="flex items-center gap-2 text-sm">
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
+                  <CreditCard className="size-4 text-muted-foreground" />
                   <span className="capitalize">{profile.membershipTier} membership</span>
                 </div>
               )}
@@ -216,7 +219,7 @@ export default async function UserViewPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Interests & Places</CardTitle>
-                  <CardDescription>User's interests and favorite places</CardDescription>
+                  <CardDescription>User&apos;s interests and favorite places</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2">
                   <div>
@@ -302,15 +305,15 @@ export default async function UserViewPage({
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${profile.preferences?.accessibility.wheelchair ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div className={`size-4 rounded-full ${profile.preferences?.accessibility.wheelchair ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                       <span className="text-sm">Wheelchair Accessible</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${profile.preferences?.accessibility.familyFriendly ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div className={`size-4 rounded-full ${profile.preferences?.accessibility.familyFriendly ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                       <span className="text-sm">Family Friendly</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${profile.preferences?.accessibility.petFriendly ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div className={`size-4 rounded-full ${profile.preferences?.accessibility.petFriendly ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                       <span className="text-sm">Pet Friendly</span>
                     </div>
                   </div>
@@ -323,7 +326,7 @@ export default async function UserViewPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Social Media Links</CardTitle>
-                  <CardDescription>User's connected social accounts</CardDescription>
+                  <CardDescription>User&apos;s connected social accounts</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
@@ -351,7 +354,7 @@ export default async function UserViewPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Privacy Settings</CardTitle>
-                  <CardDescription>User's privacy and visibility preferences</CardDescription>
+                  <CardDescription>User&apos;s privacy and visibility preferences</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
@@ -376,7 +379,7 @@ export default async function UserViewPage({
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Notification Preferences</CardTitle>
-                  <CardDescription>User's notification settings</CardDescription>
+                  <CardDescription>User&apos;s notification settings</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-3">
                   <div className="space-y-2">
@@ -413,13 +416,13 @@ export default async function UserViewPage({
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Recent Activity</CardTitle>
-                    <CardDescription>User's recent actions and interactions</CardDescription>
+                    <CardDescription>User&apos;s recent actions and interactions</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4 max-h-80 overflow-y-auto">
                       {profile.activityFeed.slice(0, 10).map((activity: ActivityItem, i) => (
                         <div key={i} className="flex items-start gap-3 pb-3 border-b last:border-0">
-                          <div className="w-2 h-2 mt-2 rounded-full bg-primary"></div>
+                          <div className="size-2 mt-2 rounded-full bg-primary"></div>
                           <div className="flex-1">
                             <div className="text-sm font-medium">{activity.type.replace('_', ' ').toUpperCase()}</div>
                             <div className="text-xs text-muted-foreground">{formatDate(activity.timestamp)}</div>
@@ -464,21 +467,22 @@ export default async function UserViewPage({
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Achievements</CardTitle>
-                    <CardDescription>User's achievements and badges</CardDescription>
+                    <CardDescription>User&apos;s achievements and badges</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {profile.achievements.map((achievement: AchievementItem, i) => (
                         <div key={i} className="flex gap-3 border p-3 rounded-lg">
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0">
                             {achievement.icon ? (
-                              <img 
+                              <Image 
                                 src={achievement.icon} 
                                 alt={achievement.title}
-                                className="w-10 h-10"
+                                width={40}
+                                height={40}
                               />
                             ) : (
-                              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                              <div className="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
                                 🏆
                               </div>
                             )}

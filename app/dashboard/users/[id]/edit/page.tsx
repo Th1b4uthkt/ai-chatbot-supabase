@@ -1,17 +1,17 @@
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { UserEditForm } from '@/components/dashboard/user-edit-form';
 import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
 import { ProfileType } from '@/types/profile';
 
 export default async function UserEditPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -62,7 +62,7 @@ export default async function UserEditPage({
           href={`/dashboard/users/${id}/view`}
           className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to User Details</span>
         </Link>
       </div>

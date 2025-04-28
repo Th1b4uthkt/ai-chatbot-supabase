@@ -1,9 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import {
+import { 
   ColumnDef,
   ColumnFiltersState,
   SortingState,
@@ -16,22 +13,29 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { 
-  Edit, 
-  Trash,
-  Search,
-  Calendar,
-  MapPin,
-  Tag,
-  CircleEllipsis,
-  Plus,
-  Star,
-  Clock,
   ArrowUpDown,
-  Eye
+  Calendar,
+  CircleEllipsis,
+  Clock,
+  Edit, 
+  Eye,
+  MapPin,
+  Plus,
+  Search,
+  Star,
+  Tag,
+  Trash,
+  Users,
+  Settings
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-import { EventType } from '@/types/events';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -42,6 +46,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -50,18 +61,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
+import { EventType } from '@/types/events';
 
 export function EventsList() {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -161,7 +164,7 @@ export function EventsList() {
     };
 
     fetchEvents();
-  }, [toast]);
+  }, [toast, supabase]);
 
   // Format date nicely
   const formatDate = (dateString?: string) => {
@@ -222,7 +225,7 @@ export function EventsList() {
           className="font-medium"
         >
           Event
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 size-4" />
         </Button>
       ),
       cell: ({ row }) => {
@@ -232,16 +235,18 @@ export function EventsList() {
             className="flex items-center gap-3 cursor-pointer py-1.5 max-w-md"
             onClick={() => router.push(`/dashboard/events/${event.id}/view`)}
           >
-            <div className="relative flex-shrink-0 h-12 w-12">
+            <div className="relative size-12 shrink-0">
               {event.image ? (
-                <img
+                <Image
                   src={event.image}
                   alt={`${event.title} thumbnail`}
-                  className="w-12 h-12 rounded-md object-cover"
+                  width={48}
+                  height={48}
+                  className="rounded-md object-cover"
                 />
               ) : (
-                <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-muted-foreground/60" />
+                <div className="size-12 bg-muted rounded-md flex items-center justify-center">
+                  <Calendar className="size-6 text-muted-foreground" />
                 </div>
               )}
             </div>
@@ -266,7 +271,12 @@ export function EventsList() {
       accessorKey: 'category',
       header: 'Category',
       cell: ({ row }) => {
-        return <div>{row.getValue('category')}</div>;
+        const category = row.getValue('category') as string;
+        return (
+          <Badge variant={getCategoryVariant(category)} className="text-xs">
+            {category || 'Uncategorized'}
+          </Badge>
+        );
       },
       enableHiding: true,
     },
@@ -274,7 +284,7 @@ export function EventsList() {
       accessorKey: 'time',
       header: () => (
         <div className="flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <Clock className="size-3.5 text-muted-foreground/70" />
           <span>Date & Time</span>
         </div>
       ),
@@ -299,7 +309,7 @@ export function EventsList() {
       accessorKey: 'location',
       header: () => (
         <div className="flex items-center gap-2">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <MapPin className="size-3.5 text-muted-foreground/70" />
           <span>Location</span>
         </div>
       ),
@@ -313,7 +323,7 @@ export function EventsList() {
       accessorKey: 'rating',
       header: () => (
         <div className="flex items-center gap-2">
-          <Star className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <Star className="size-3.5 text-muted-foreground/70" />
           <span>Rating</span>
         </div>
       ),
@@ -382,9 +392,9 @@ export function EventsList() {
           <TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="size-8">
                   <span className="sr-only">Open menu</span>
-                  <CircleEllipsis className="h-4 w-4" />
+                  <CircleEllipsis className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -393,15 +403,22 @@ export function EventsList() {
                   onClick={() => router.push(`/dashboard/events/${event.id}/view`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="size-4" />
                   View Details
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => router.push(`/dashboard/events/${event.id}/edit`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="size-4" />
                   Edit Event
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push(`/dashboard/events/${event.id}/manage`)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Settings className="size-4" /> 
+                  Manage Event
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -417,7 +434,7 @@ export function EventsList() {
                       onClick={handleDelete}
                       className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash className="size-4" />
                       Delete Event
                     </DropdownMenuItem>
                   </TooltipTrigger>
@@ -458,7 +475,7 @@ export function EventsList() {
         <CardContent className="flex items-center justify-center p-10">
           <div className="text-center space-y-3">
             <div className="flex justify-center">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+              <div className="animate-spin size-8 border-2 border-primary border-t-transparent rounded-full" />
             </div>
             <p className="text-muted-foreground">Loading events...</p>
           </div>
@@ -472,7 +489,7 @@ export function EventsList() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
             <Input
               placeholder="Search events..."
               value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
@@ -509,7 +526,7 @@ export function EventsList() {
         
         <Link href="/dashboard/events/create">
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             New Event
           </Button>
         </Link>

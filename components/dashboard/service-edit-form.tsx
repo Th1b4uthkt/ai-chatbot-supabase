@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Info, Upload, X, Trash, Plus, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Info, Upload, X, Trash } from 'lucide-react';
 
-import { ServiceType, getCategoryDisplayName } from '@/types/services';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -19,10 +20,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -30,12 +27,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { 
+  PriceIndicator, 
   ServiceCategory, 
-  Subcategory, 
-  PriceIndicator 
+  Subcategory 
 } from '@/types/common';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ServiceType, getCategoryDisplayName } from '@/types/services';
 
 // Basic validation schema
 const formSchema = z.object({
@@ -90,7 +90,7 @@ function TagInput({ tags, setTags, placeholder = "Add tag..." }: TagInputProps) 
           <Badge key={index} variant="secondary" className="flex items-center gap-1">
             {tag}
             <X 
-              className="h-3 w-3 cursor-pointer" 
+              className="size-3 cursor-pointer" 
               onClick={() => removeTag(tag)}
             />
           </Badge>
@@ -236,7 +236,7 @@ function AccommodationFields({ data, onChange }: CategoryFieldsProps) {
                     size="sm"
                     onClick={() => removeRoomType(index)}
                   >
-                    <Trash className="h-4 w-4 text-destructive" />
+                    <Trash className="size-4 text-destructive" />
                   </Button>
                 </div>
                 
@@ -435,7 +435,7 @@ function WellnessFields({ data, onChange }: CategoryFieldsProps) {
                     size="sm"
                     onClick={() => removeTreatment(index)}
                   >
-                    <Trash className="h-4 w-4 text-destructive" />
+                    <Trash className="size-4 text-destructive" />
                   </Button>
                 </div>
                 
@@ -579,7 +579,7 @@ function MobilityFields({ data, onChange }: CategoryFieldsProps) {
                     size="sm"
                     onClick={() => removeVehicle(index)}
                   >
-                    <Trash className="h-4 w-4 text-destructive" />
+                    <Trash className="size-4 text-destructive" />
                   </Button>
                 </div>
                 
@@ -1301,7 +1301,7 @@ export function ServiceEditForm({ service, onSuccess, redirectUrl }: ServiceEdit
           <TabsContent value="category" className="space-y-4 py-4">
             <div className="bg-muted p-4 rounded-md">
               <div className="flex items-start gap-2">
-                <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <Info className="size-5 text-muted-foreground mt-0.5" />
                 <div>
                   <p className="font-medium">Category-specific information</p>
                   <p className="text-sm text-muted-foreground">
@@ -1314,7 +1314,7 @@ export function ServiceEditForm({ service, onSuccess, redirectUrl }: ServiceEdit
             <div className="border rounded-md p-4">
               {!form.watch('category') ? (
                 <div className="py-8 text-center text-muted-foreground">
-                  Please select a category in the "Basic Info" tab first
+                  Please select a category in the Basic Info tab first
                 </div>
               ) : form.watch('category') === ServiceCategory.ACCOMMODATION ? (
                 <AccommodationFields 
@@ -1361,7 +1361,12 @@ export function ServiceEditForm({ service, onSuccess, redirectUrl }: ServiceEdit
           </Button>
           
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : service ? 'Update Service' : 'Create Service'}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Saving...
+              </>
+            ) : service ? 'Update Service' : 'Create Service'}
           </Button>
         </div>
       </form>

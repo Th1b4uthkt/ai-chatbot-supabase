@@ -1,14 +1,16 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { X, Save, Loader2, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
-import { X, Save, Loader2 } from 'lucide-react';
 
-import { ProfileType } from '@/types/profile';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -19,15 +21,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { ProfileType } from '@/types/profile';
 
 // Custom component for tag inputs (interests, places, etc.)
 interface TagInputProps {
@@ -66,9 +66,9 @@ function TagInput({ tags, setTags, placeholder = "Add tag..." }: TagInputProps) 
             <button 
               type="button" 
               onClick={() => removeTag(tag)}
-              className="text-xs hover:bg-gray-200 rounded-full w-4 h-4 inline-flex items-center justify-center"
+              className="text-xs hover:bg-gray-200 rounded-full size-4 inline-flex items-center justify-center"
             >
-              <X className="h-3 w-3" />
+              <X className="size-3 cursor-pointer" />
             </button>
           </Badge>
         ))}
@@ -271,6 +271,10 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                     <FormControl>
                       <Input placeholder="Full name" {...field} />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      This is your public display name. It can be your real name or a
+                      pseudonym. You can only change this once every 30 days.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -283,8 +287,11 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Username" {...field} />
+                      <Input placeholder="shadcn" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      This will be your unique identifier on the platform. Cannot be changed later.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -297,8 +304,11 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="user@example.com" {...field} />
+                      <Input type="email" placeholder="m@example.com" {...field} disabled /> 
                     </FormControl>
+                    <FormDescription>
+                      Your email address is private and won&apos;t be displayed publicly.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -368,10 +378,14 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                 <FormItem>
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="User bio" className="min-h-[120px]" {...field} />
+                    <Textarea
+                      placeholder="Tell us a little bit about yourself"
+                      className="resize-none"
+                      {...field}
+                    />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    Brief description about the user. Limit 500 characters.
+                  <FormDescription>
+                    You can @mention other users and organizations to link to them.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -411,7 +425,7 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                   <FormItem className="space-y-3">
                     <FormLabel>Membership Tier</FormLabel>
                     <FormDescription>
-                      Select the user's membership level
+                      Select the user&apos;s membership level
                     </FormDescription>
                     <FormControl>
                       <RadioGroup
@@ -484,7 +498,7 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                       />
                     </FormControl>
                     <FormDescription className="text-xs">
-                      User's interests and hobbies
+                      User&apos;s interests and hobbies
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -505,7 +519,7 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                       />
                     </FormControl>
                     <FormDescription className="text-xs">
-                      User's favorite locations
+                      User&apos;s favorite locations
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -739,7 +753,7 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                   <FormItem className="space-y-3">
                     <FormLabel>Profile Visibility</FormLabel>
                     <FormDescription>
-                      Control who can see the user's profile
+                      Control who can see the user&apos;s profile
                     </FormDescription>
                     <Select 
                       onValueChange={field.onChange} 
@@ -818,7 +832,7 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
                       <div className="space-y-1 leading-none">
                         <FormLabel>Show Attended Events</FormLabel>
                         <FormDescription>
-                          Allow others to see events you've attended
+                          Allow others to see events you&apos;ve attended
                         </FormDescription>
                       </div>
                     </FormItem>
@@ -953,12 +967,12 @@ export function UserEditForm({ user, onSuccess, redirectUrl }: UserEditFormProps
             <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 size-4 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
+                  <Save className="mr-2 size-4" />
                   Save Changes
                 </>
               )}

@@ -1,33 +1,22 @@
-import { redirect } from 'next/navigation';
+import { ArrowLeft, Edit, MapPin, Clock, Tag, Star, Info, Mail, Phone, Globe, Building, Languages, CheckCircle, XCircle, Users, DollarSign, Accessibility, Baby, Dog, CreditCard, Smartphone, Coins } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Edit, 
-  MapPin, 
-  Clock, 
-  Tag,
-  Star,
-  Info,
-  Mail,
-  Phone,
-  Globe,
-  Building,
-  Languages
-} from 'lucide-react';
+import { redirect } from 'next/navigation';
+import React from 'react';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/server';
 import { Activity, getCategoryDisplayName, getSubcategoryDisplayName } from '@/types/activity';
 import { ActivityCategory, Subcategory, PriceIndicator } from '@/types/common';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 
 export default async function ActivityViewPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const supabase = await createClient();
   
@@ -67,6 +56,7 @@ export default async function ActivityViewPage({
     .single();
   
   if (baseItemError || !baseItemData) {
+    console.error('Error fetching base item:', baseItemError);
     redirect('/dashboard/activities');
   }
   
@@ -79,45 +69,46 @@ export default async function ActivityViewPage({
     
   if (activityError || !activityDetails) {
     console.error('Error fetching activity details:', activityError);
+    // Consider showing an error message instead of redirecting immediately
     redirect('/dashboard/activities');
   }
   
-  // Format data to match our Activity interface
+  // Format data to match our Activity interface - Added explicit type casting
   const activity: Activity = {
     id: baseItemData.id,
     name: baseItemData.name,
-    type: baseItemData.type,
-    category: activityDetails.category,
-    subcategory: activityDetails.subcategory,
-    mainImage: baseItemData.main_image,
-    galleryImages: baseItemData.gallery_images || [],
-    shortDescription: baseItemData.short_description,
-    longDescription: baseItemData.long_description,
-    address: baseItemData.address,
-    coordinates: baseItemData.coordinates,
-    area: baseItemData.area,
-    contactInfo: baseItemData.contact_info || {},
-    hours: baseItemData.hours,
-    open24h: baseItemData.open_24h,
-    rating: baseItemData.rating,
-    tags: baseItemData.tags || [],
-    priceRange: baseItemData.price_range,
-    currency: baseItemData.currency || 'THB',
-    features: baseItemData.features || [],
-    languages: baseItemData.languages || [],
-    updatedAt: baseItemData.updated_at,
-    isSponsored: baseItemData.is_sponsored,
-    isFeatured: baseItemData.is_featured,
-    paymentMethods: baseItemData.payment_methods,
-    accessibility: baseItemData.accessibility,
-    activityData: activityDetails.activity_data
+    type: baseItemData.type as Activity['type'], // Cast to ItemType.ACTIVITY
+    category: activityDetails.category as ActivityCategory,
+    subcategory: activityDetails.subcategory as Subcategory,
+    mainImage: baseItemData.main_image ?? '',
+    galleryImages: baseItemData.gallery_images as string[] | undefined,
+    shortDescription: baseItemData.short_description ?? '',
+    longDescription: baseItemData.long_description ?? '',
+    address: baseItemData.address ?? '',
+    coordinates: baseItemData.coordinates as { latitude: number; longitude: number; } | undefined,
+    area: baseItemData.area as string | undefined,
+    contactInfo: baseItemData.contact_info as Activity['contactInfo'] ?? {},
+    hours: (baseItemData.hours as string) ?? '',
+    open24h: baseItemData.open_24h ?? undefined,
+    rating: baseItemData.rating as Activity['rating'] | undefined, // Cast to expected type
+    tags: baseItemData.tags as string[] ?? [],
+    priceRange: baseItemData.price_range as PriceIndicator ?? PriceIndicator.VARIES,
+    currency: baseItemData.currency ?? 'THB',
+    features: baseItemData.features as string[] ?? [],
+    languages: baseItemData.languages as string[] | undefined,
+    updatedAt: baseItemData.updated_at ?? new Date().toISOString(), // Default to now if null
+    isSponsored: baseItemData.is_sponsored ?? undefined,
+    isFeatured: baseItemData.is_featured ?? undefined,
+    paymentMethods: baseItemData.payment_methods as Activity['paymentMethods'] | undefined,
+    accessibility: baseItemData.accessibility as Activity['accessibility'] | undefined,
+    activityData: activityDetails.activity_data as Activity['activityData'] | undefined
   };
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-6">
       <div className="mb-6">
         <Link href="/dashboard/activities" className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Activities</span>
         </Link>
       </div>
@@ -130,7 +121,7 @@ export default async function ActivityViewPage({
         
         <Link href={`/dashboard/activities/${id}/edit`}>
           <Button>
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="mr-2 size-4" />
             Edit Activity
           </Button>
         </Link>
@@ -142,18 +133,20 @@ export default async function ActivityViewPage({
           <CardHeader className="pb-2">
             <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
               {activity.mainImage ? (
-                <img 
+                <Image 
                   src={activity.mainImage} 
                   alt={activity.name}
-                  className="w-full h-full object-cover"
+                  width={500}
+                  height={300}
+                  className="size-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <Building className="h-16 w-16 text-muted-foreground/50" />
+                <div className="size-full bg-muted flex items-center justify-center">
+                  <Building className="size-16 text-muted-foreground/50" />
                 </div>
               )}
               <Badge className="absolute top-2 right-2 capitalize" variant="default">
-                {getCategoryDisplayName(activity.category as ActivityCategory)}
+                {getCategoryDisplayName(activity.category)}
               </Badge>
             </div>
             <div className="space-y-1">
@@ -161,7 +154,7 @@ export default async function ActivityViewPage({
                 <CardTitle className="text-xl">{activity.name}</CardTitle>
                 {activity.rating && activity.rating.score > 0 && (
                   <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                    <Star className="size-4 fill-amber-500 text-amber-500" />
                     <span className="font-medium">{activity.rating.score.toFixed(1)}</span>
                     {activity.rating.reviewCount > 0 && (
                       <span className="text-xs text-muted-foreground">({activity.rating.reviewCount})</span>
@@ -171,7 +164,7 @@ export default async function ActivityViewPage({
               </div>
               
               <CardDescription>
-                {getSubcategoryDisplayName(activity.subcategory as Subcategory)}
+                {getSubcategoryDisplayName(activity.subcategory)}
               </CardDescription>
             </div>
           </CardHeader>
@@ -181,12 +174,12 @@ export default async function ActivityViewPage({
           <CardContent className="pt-4">
             <div className="space-y-4">
               <div className="flex items-start gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <MapPin className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{activity.address || 'No location set'}</div>
                   {activity.coordinates && (
                     <div className="text-xs text-muted-foreground mt-1">
-                      {activity.coordinates.latitude}, {activity.coordinates.longitude}
+                      {activity.coordinates.latitude.toFixed(6)}, {activity.coordinates.longitude.toFixed(6)}
                     </div>
                   )}
                   {activity.area && (
@@ -198,7 +191,7 @@ export default async function ActivityViewPage({
               </div>
               
               <div className="flex items-start gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <Clock className="size-4 text-muted-foreground mt-0.5" />
                 <div>
                   <div>{activity.hours || 'Hours not specified'}</div>
                   {activity.open24h && (
@@ -209,26 +202,31 @@ export default async function ActivityViewPage({
                 </div>
               </div>
               
-              {activity.contactInfo && (
+              {activity.contactInfo && (Object.keys(activity.contactInfo).length > 0) && (
                 <div className="flex items-start gap-2 text-sm">
-                  <Info className="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <Info className="size-4 text-muted-foreground mt-0.5" />
                   <div className="space-y-1">
                     {activity.contactInfo.phone && (
                       <div className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" /> 
+                        <Phone className="size-3" /> 
                         <span>{activity.contactInfo.phone}</span>
                       </div>
                     )}
                     {activity.contactInfo.email && (
                       <div className="flex items-center gap-1">
-                        <Mail className="h-3 w-3" /> 
+                        <Mail className="size-3" /> 
                         <span>{activity.contactInfo.email}</span>
                       </div>
                     )}
                     {activity.contactInfo.website && (
                       <div className="flex items-center gap-1">
-                        <Globe className="h-3 w-3" /> 
-                        <a href={activity.contactInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        <Globe className="size-3" /> 
+                        <a 
+                          href={activity.contactInfo.website.startsWith('http') ? activity.contactInfo.website : `https://${activity.contactInfo.website}`}
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-600 hover:underline"
+                        >
                           Website
                         </a>
                       </div>
@@ -239,9 +237,9 @@ export default async function ActivityViewPage({
               
               {activity.tags && activity.tags.length > 0 && (
                 <div className="flex items-start gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <div className="flex flex-wrap gap-1">
-                    {activity.tags.map((tag, index) => (
+                  <Tag className="size-4 text-muted-foreground mt-0.5" />
+                  <div className="flex flex-wrap gap-1.5">
+                    {activity.tags.map((tag: string, index: number) => (
                       <Badge key={index} variant="secondary" className="text-xs">
                         {tag}
                       </Badge>
@@ -251,149 +249,147 @@ export default async function ActivityViewPage({
               )}
             </div>
           </CardContent>
-          
-          <CardFooter className="flex justify-between border-t pt-4">
-            <div className="w-full">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Price Range:</span>
-                  <Badge>{activity.priceRange}</Badge>
-                </div>
-                
-                {activity.languages && activity.languages.length > 0 && (
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-1">
-                      <Languages className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Languages:</span>
-                    </div>
-                    <div className="text-sm">
-                      {activity.languages.join(', ')}
-                    </div>
-                  </div>
-                )}
-                
-                {activity.updatedAt && (
-                  <div className="text-xs text-right text-muted-foreground">
-                    Last updated: {new Date(activity.updatedAt).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-            </div>
+          <CardFooter className="pt-4">
+            <p className="text-xs text-muted-foreground">Last updated: {new Date(activity.updatedAt).toLocaleDateString()}</p>
           </CardFooter>
         </Card>
-        
-        {/* Tabs content */}
+
+        {/* Main Content */}
         <div className="md:col-span-2">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="w-full justify-start">
+          <Tabs defaultValue="details">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
               <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="category-specific">Category Info</TabsTrigger>
+              <TabsTrigger value="gallery">Gallery</TabsTrigger>
             </TabsList>
             
             {/* Details Tab */}
-            <TabsContent value="details" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Activity Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose max-w-none">
-                    <h3 className="text-base font-medium mb-2">Short Description</h3>
-                    <p className="mb-4">{activity.shortDescription}</p>
-                    
-                    <h3 className="text-base font-medium mb-2">Long Description</h3>
-                    <p className="whitespace-pre-wrap">{activity.longDescription}</p>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="details" className="space-y-6">
+              {/* Short Description */}
+              {activity.shortDescription && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">{activity.shortDescription}</p>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Long Description */}
+              {activity.longDescription && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Description</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Use whitespace-pre-wrap to respect newlines from the input */}
+                    <p className="text-sm whitespace-pre-wrap">{activity.longDescription}</p>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Category Specific Info */}
+              {activity.activityData && Object.keys(activity.activityData).length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{getCategoryDisplayName(activity.category)} Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {renderCategorySpecificInfo(activity)}
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Features */}
+              {activity.features && activity.features.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Features</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-1 list-disc list-inside text-sm">
+                      {activity.features.map((feature: string, index: number) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Payment Methods */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payment Methods</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {activity.paymentMethods ? (
+                      <PaymentMethodsSection paymentMethods={activity.paymentMethods} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Not specified</p>
+                    )}
+                  </CardContent>
+                </Card>
+                
+                {/* Accessibility */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Accessibility</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {activity.accessibility ? (
+                      <AccessibilitySection accessibility={activity.accessibility} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Not specified</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Languages Spoken */}
+              {activity.languages && activity.languages.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Languages Spoken</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {activity.languages.map((lang: string, index: number) => (
+                        <Badge key={index} variant="outline">
+                          <Languages className="mr-1 size-3" /> {lang}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
-            
-            {/* Features Tab */}
-            <TabsContent value="features" className="space-y-6 mt-6">
+
+            {/* Gallery Tab */}
+            <TabsContent value="gallery">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Activity Features</CardTitle>
-                  <CardDescription>Key features and amenities</CardDescription>
+                  <CardTitle>Gallery</CardTitle>
+                  <CardDescription>Images for {activity.name}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {activity.features && activity.features.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {activity.features.map((feature, index) => (
-                        <div 
-                          key={index} 
-                          className="bg-muted/40 p-3 rounded-md text-sm flex items-center gap-2"
-                        >
-                          <div className="h-2 w-2 rounded-full bg-primary"></div>
-                          <span>{feature}</span>
+                  {activity.galleryImages && activity.galleryImages.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {activity.galleryImages.map((imgUrl: string, index: number) => (
+                        <div key={index} className="relative aspect-square rounded-md overflow-hidden">
+                          <Image 
+                            src={imgUrl}
+                            alt={`${activity.name} gallery image ${index + 1}`}
+                            fill
+                            className="object-cover transition-transform duration-300 hover:scale-105"
+                          />
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-40 bg-muted/30 rounded-md">
-                      <div className="text-center">
-                        <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-                        <p className="text-muted-foreground">No features specified</p>
-                      </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground">No gallery images available.</p>
                   )}
-                  
-                  {activity.accessibility && (
-                    <div className="mt-8">
-                      <h3 className="text-base font-medium mb-4">Accessibility</h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <AccessibilityItem 
-                          title="Wheelchair Accessible" 
-                          available={activity.accessibility.wheelchairAccessible} 
-                        />
-                        <AccessibilityItem 
-                          title="Family Friendly" 
-                          available={activity.accessibility.familyFriendly} 
-                        />
-                        <AccessibilityItem 
-                          title="Pet Friendly" 
-                          available={activity.accessibility.petFriendly} 
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  {activity.paymentMethods && (
-                    <div className="mt-8">
-                      <h3 className="text-base font-medium mb-4">Payment Methods</h3>
-                      <div className="grid grid-cols-3 gap-4">
-                        <AccessibilityItem 
-                          title="Cash" 
-                          available={activity.paymentMethods.cash} 
-                        />
-                        <AccessibilityItem 
-                          title="Card" 
-                          available={activity.paymentMethods.card} 
-                        />
-                        <AccessibilityItem 
-                          title="Mobile Payment" 
-                          available={activity.paymentMethods.mobilePay} 
-                        />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            {/* Category Specific Tab */}
-            <TabsContent value="category-specific" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {getCategoryDisplayName(activity.category as ActivityCategory)} Specific Information
-                  </CardTitle>
-                  <CardDescription>
-                    Details specific to {getCategoryDisplayName(activity.category as ActivityCategory)} activities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {renderCategorySpecificInfo(activity)}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -404,227 +400,208 @@ export default async function ActivityViewPage({
   );
 }
 
-// Component for accessibility/feature items
-function AccessibilityItem({ title, available }: { title: string, available?: boolean }) {
+// Helper component for Payment Methods
+function PaymentMethodsSection({ paymentMethods }: { paymentMethods: Activity['paymentMethods'] }) {
+  if (!paymentMethods) return <p className="text-sm text-muted-foreground">Not specified</p>;
+
+  const methods = [
+    paymentMethods.cash && { icon: Coins, label: 'Cash' },
+    paymentMethods.card && { icon: CreditCard, label: 'Card' },
+    paymentMethods.mobilePay && { icon: Smartphone, label: 'Mobile Pay' }
+  ].filter(Boolean) as { icon: React.ElementType, label: string }[]; // Filter out falsy values and assert type
+
+  if (methods.length === 0) {
+    return <p className="text-sm text-muted-foreground">Not specified</p>;
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center p-4 bg-muted/30 rounded-md text-center">
-      <div className={`h-3 w-3 rounded-full mb-2 ${available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs text-muted-foreground">{available ? 'Available' : 'Not available'}</p>
+    <div className="space-y-2">
+      {methods.map((method) => (
+        <PaymentMethodItem key={method.label} icon={method.icon} label={method.label} />
+      ))}
     </div>
   );
 }
 
-// Render different content based on activity category
+function PaymentMethodItem({ icon: Icon, label }: { icon: React.ElementType, label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <Icon className="size-4 text-muted-foreground" />
+      <span>{label} Accepted</span>
+    </div>
+  );
+}
+
+// Helper component for Accessibility
+function AccessibilitySection({ accessibility }: { accessibility: Activity['accessibility'] }) {
+  if (!accessibility) return <p className="text-sm text-muted-foreground">Not specified</p>;
+
+  const items = [
+    { title: 'Wheelchair Accessible', available: accessibility.wheelchairAccessible },
+    { title: 'Family Friendly', available: accessibility.familyFriendly },
+    { title: 'Pet Friendly', available: accessibility.petFriendly }
+  ];
+
+  return (
+    <div className="space-y-2">
+      {items.map(item => (
+        <AccessibilityItem key={item.title} title={item.title} available={item.available} />
+      ))}
+    </div>
+  );
+}
+
+function AccessibilityItem({ title, available }: { title: string, available?: boolean }) {
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      {available === true ? (
+        <CheckCircle className="size-4 text-green-600" />
+      ) : available === false ? (
+        <XCircle className="size-4 text-red-600" />
+      ) : (
+        <span className="size-4 inline-block"></span> // Placeholder if undefined
+      )}
+      <span>{title}</span>
+    </div>
+  );
+}
+
+// Helper to render category-specific info
 function renderCategorySpecificInfo(activity: Activity) {
-  const category = activity.category as ActivityCategory;
-  const activityData = activity.activityData || {};
-  
-  switch (category) {
-    case ActivityCategory.FOOD_DRINK:
-      return (
-        <div className="space-y-6">
-          {activityData.cuisine && activityData.cuisine.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">Cuisine</h3>
-              <div className="flex flex-wrap gap-2">
-                {activityData.cuisine.map((item: string, index: number) => (
-                  <Badge key={index} variant="secondary">
-                    {item}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+  const data = activity.activityData;
+  if (!data || Object.keys(data).length === 0) return <p className="text-sm text-muted-foreground">No specific details available.</p>;
+
+  // Define a type for activity items in Leisure category for clarity
+  type LeisureActivityItem = {
+    name: string;
+    duration: string;
+    price: number;
+    skillLevel?: string;
+  };
+
+  // Define a type for event items in Culture category
+  type CultureEventItem = {
+    name: string;
+    date: string;
+    ticketPrice?: number;
+  };
+
+  return (
+    <div className="space-y-4 text-sm">
+      {/* Food & Drink */}
+      {activity.category === ActivityCategory.FOOD_DRINK && (
+        <>
+          {data.cuisine && data.cuisine.length > 0 && (
+            <InfoItem label="Cuisine" value={data.cuisine.join(', ')} />
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Dining Options</h3>
-              <div className="space-y-1">
-                <p className="text-sm">Take Away: {activityData.takeAway ? 'Available' : 'Not available'}</p>
-                <p className="text-sm">Delivery: {activityData.delivery ? 'Available' : 'Not available'}</p>
-                <p className="text-sm">Reservation: {activityData.reservation ? 'Accepted' : 'Not needed'}</p>
-              </div>
-            </div>
-            
-            {activityData.happyHour && (
-              <div>
-                <h3 className="text-sm font-medium mb-2">Happy Hour</h3>
-                <p className="text-sm">{activityData.happyHour.available ? `Yes - ${activityData.happyHour.time || ''}` : 'Not available'}</p>
-              </div>
-            )}
-          </div>
-          
-          {activityData.dietaryOptions && activityData.dietaryOptions.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">Dietary Options</h3>
-              <div className="flex flex-wrap gap-2">
-                {activityData.dietaryOptions.map((option: string, index: number) => (
-                  <Badge key={index} variant="outline">
-                    {option}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+          {data.specialties && data.specialties.length > 0 && (
+            <InfoItem label="Specialties" value={data.specialties.join(', ')} />
           )}
-          
-          {activityData.atmosphere && activityData.atmosphere.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">Atmosphere</h3>
-              <div className="flex flex-wrap gap-2">
-                {activityData.atmosphere.map((item: string, index: number) => (
-                  <span key={index} className="bg-muted/40 px-2 py-1 rounded text-sm">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
+          {typeof data.takeAway === 'boolean' && (
+            <InfoItem label="Take Away" value={data.takeAway ? 'Yes' : 'No'} />
           )}
-        </div>
-      );
-    
-    case ActivityCategory.LEISURE:
-      return (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Activity Type</h3>
-              <p className="text-sm font-medium">{activityData.activityType}</p>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-2">Requirements</h3>
-              <div className="space-y-1">
-                <p className="text-sm">Equipment Included: {activityData.equipmentIncluded ? 'Yes' : 'No'}</p>
-                <p className="text-sm">Booking Required: {activityData.bookingRequired ? 'Yes' : 'No'}</p>
-                {activityData.minimumAge && (
-                  <p className="text-sm">Minimum Age: {activityData.minimumAge}</p>
-                )}
-                <p className="text-sm">Weather Dependent: {activityData.weatherDependent ? 'Yes' : 'No'}</p>
-              </div>
-            </div>
-          </div>
-          
-          {activityData.activities && activityData.activities.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-3">Available Activities</h3>
-              <div className="space-y-2">
-                {activityData.activities.map((act: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center border-b pb-2">
-                    <div>
-                      <p className="font-medium">{act.name}</p>
-                      <div className="flex gap-3 text-xs text-muted-foreground">
-                        <span>Duration: {act.duration}</span>
-                        {act.skillLevel && (
-                          <span>Level: {act.skillLevel}</span>
-                        )}
-                      </div>
-                    </div>
-                    <Badge>
-                      {activity.currency} {act.price}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {typeof data.delivery === 'boolean' && (
+            <InfoItem label="Delivery" value={data.delivery ? 'Yes' : 'No'} />
           )}
-        </div>
-      );
+          {typeof data.reservation === 'boolean' && (
+            <InfoItem label="Reservation" value={data.reservation ? 'Recommended' : 'Not Required'} />
+          )}
+          {data.happyHour?.available && (
+            <InfoItem label="Happy Hour" value={data.happyHour.time || 'Available'} />
+          )}
+          {data.dietaryOptions && data.dietaryOptions.length > 0 && (
+            <InfoItem label="Dietary Options" value={data.dietaryOptions.join(', ')} />
+          )}
+          {data.atmosphere && data.atmosphere.length > 0 && (
+            <InfoItem label="Atmosphere" value={data.atmosphere.join(', ')} />
+          )}
+        </>
+      )}
       
-    case ActivityCategory.CULTURE:
-      return (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-sm font-medium mb-2">Venue Type</h3>
-            <Badge variant="outline" className="capitalize">
-              {activityData.venueType}
-            </Badge>
-          </div>
-          
-          <div>
-            <h3 className="text-sm font-medium mb-2">Features</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-muted/40 p-2 rounded text-sm">
-                Workshops Available: {activityData.workshopsAvailable ? 'Yes' : 'No'}
-              </div>
-              <div className="bg-muted/40 p-2 rounded text-sm">
-                Photography Allowed: {activityData.photographyAllowed ? 'Yes' : 'No'}
-              </div>
-            </div>
-          </div>
-          
-          {activityData.upcomingEvents && activityData.upcomingEvents.length > 0 && (
+      {/* Leisure */}
+      {activity.category === ActivityCategory.LEISURE && (
+        <>
+          {data.activityType && <InfoItem label="Activity Type" value={data.activityType} />}
+          {data.activities && data.activities.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-3">Upcoming Events</h3>
-              <div className="space-y-2">
-                {activityData.upcomingEvents.map((event: any, index: number) => (
-                  <div key={index} className="border rounded p-3">
-                    <p className="font-medium">{event.name}</p>
-                    <div className="flex justify-between mt-1">
-                      <p className="text-sm text-muted-foreground">{event.date}</p>
-                      {event.ticketPrice && (
-                        <Badge>
-                          {activity.currency} {event.ticketPrice}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+              <p className="font-medium mb-1">Activities Offered:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                {(data.activities as LeisureActivityItem[]).map((act: LeisureActivityItem, index: number) => (
+                  <li key={index}>
+                    {act.name} ({act.duration}, {act.price} {activity.currency})
+                    {act.skillLevel && ` - Level: ${act.skillLevel}`}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
-        </div>
-      );
+          {typeof data.equipmentIncluded === 'boolean' && (
+            <InfoItem label="Equipment Included" value={data.equipmentIncluded ? 'Yes' : 'No'} />
+          )}
+          {typeof data.bookingRequired === 'boolean' && (
+            <InfoItem label="Booking Required" value={data.bookingRequired ? 'Yes' : 'Recommended'} />
+          )}
+          {data.minimumAge && <InfoItem label="Minimum Age" value={data.minimumAge.toString()} />}
+          {typeof data.weatherDependent === 'boolean' && (
+            <InfoItem label="Weather Dependent" value={data.weatherDependent ? 'Yes' : 'No'} />
+          )}
+        </>
+      )}
       
-    case ActivityCategory.SHOPPING:
-      return (
-        <div className="space-y-6">
-          {activityData.productTypes && activityData.productTypes.length > 0 && (
+      {/* Culture */}
+      {activity.category === ActivityCategory.CULTURE && (
+        <>
+          {data.venueType && <InfoItem label="Venue Type" value={data.venueType} />}
+          {data.upcomingEvents && data.upcomingEvents.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-2">Product Types</h3>
-              <div className="flex flex-wrap gap-2">
-                {activityData.productTypes.map((type: string, index: number) => (
-                  <Badge key={index} variant="secondary">
-                    {type}
-                  </Badge>
+              <p className="font-medium mb-1">Upcoming Events:</p>
+              <ul className="list-disc list-inside space-y-1 ml-4">
+                {(data.upcomingEvents as CultureEventItem[]).map((event: CultureEventItem, index: number) => (
+                  <li key={index}>
+                    {event.name} ({new Date(event.date).toLocaleDateString()})
+                    {event.ticketPrice && ` - ${event.ticketPrice} ${activity.currency}`}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
-          
-          {activityData.specialProducts && activityData.specialProducts.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium mb-2">Special Products</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {activityData.specialProducts.map((product: string, index: number) => (
-                  <div key={index} className="bg-muted/40 p-2 rounded text-sm">
-                    {product}
-                  </div>
-                ))}
-              </div>
-            </div>
+          {typeof data.workshopsAvailable === 'boolean' && (
+            <InfoItem label="Workshops Available" value={data.workshopsAvailable ? 'Yes' : 'No'} />
           )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-sm font-medium mb-2">Shopping Features</h3>
-              <div className="space-y-1">
-                <p className="text-sm">Price Negotiation: {activityData.priceNegotiation ? 'Possible' : 'Fixed prices'}</p>
-                <p className="text-sm">Local Crafts: {activityData.localCrafts ? 'Available' : 'Not available'}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+          {typeof data.photographyAllowed === 'boolean' && (
+            <InfoItem label="Photography" value={data.photographyAllowed ? 'Allowed' : 'Restricted'} />
+          )}
+        </>
+      )}
       
-    default:
-      return (
-        <div className="flex items-center justify-center h-40 bg-muted/30 rounded-md">
-          <div className="text-center">
-            <Info className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-            <p className="text-muted-foreground">No specific information available for this category</p>
-          </div>
-        </div>
-      );
-  }
+      {/* Shopping */}
+      {activity.category === ActivityCategory.SHOPPING && (
+        <>
+          {data.productTypes && data.productTypes.length > 0 && (
+            <InfoItem label="Product Types" value={data.productTypes.join(', ')} />
+          )}
+          {data.specialProducts && data.specialProducts.length > 0 && (
+            <InfoItem label="Special Products" value={data.specialProducts.join(', ')} />
+          )}
+          {typeof data.priceNegotiation === 'boolean' && (
+            <InfoItem label="Price Negotiation" value={data.priceNegotiation ? 'Possible' : 'Fixed Prices'} />
+          )}
+          {typeof data.localCrafts === 'boolean' && (
+            <InfoItem label="Local Crafts" value={data.localCrafts ? 'Available' : 'Not Featured'} />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// Generic info item component
+function InfoItem({ label, value }: { label: string; value: string | number | boolean }) {
+  const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
+  return (
+    <div className="flex justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-right">{displayValue}</span>
+    </div>
+  );
 } 

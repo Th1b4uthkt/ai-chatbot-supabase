@@ -1,40 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Calendar, 
-  Briefcase, 
-  Activity, 
-  Award, 
+import {
+  Activity,
+  Award,
+  BarChart as BarChartIcon,
+  Briefcase,
+  Calendar,
   Star,
   TrendingUp,
-  BarChart as BarChartIcon
+  Users,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Bar, 
-  BarChart, 
-  Line, 
-  LineChart, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  ResponsiveContainer 
+import { useState, useEffect } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis
 } from 'recharts';
 
-import { StatsCard, StatsGrid } from '@/components/ui/stats-card';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
-  ChartTooltipContent,
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  ChartContainer,
   ChartLegend,
-  ChartLegendContent 
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent
 } from '@/components/ui/chart';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatNumber, formatDate } from '@/lib/utils';
+import { StatsCard, StatsGrid } from '@/components/ui/stats-card';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
+import { cn, formatNumber, formatDate } from '@/lib/utils';
 
 type ChartDataType = {
   data: number[];
@@ -222,7 +223,7 @@ export function DashboardOverview() {
     };
     
     fetchDashboardData();
-  }, [toast]);
+  }, [toast, supabase]);
   
   // Function to get color for trend indicators
   const getTrendColor = (trend: number) => {
@@ -273,7 +274,7 @@ export function DashboardOverview() {
     return (
       <div className="w-full h-48 flex items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
         </div>
       </div>
@@ -369,7 +370,7 @@ export function DashboardOverview() {
         <Card className="overflow-hidden">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="size-4 text-inherit" />
               User Growth
             </CardTitle>
             <CardDescription className="text-xs">
@@ -420,7 +421,7 @@ export function DashboardOverview() {
         <Card className="overflow-hidden">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-base font-medium flex items-center gap-2">
-              <BarChartIcon className="h-4 w-4 text-muted-foreground" />
+              <BarChartIcon className="size-4 text-inherit" />
               Content Growth
             </CardTitle>
             <CardDescription className="text-xs">
@@ -493,11 +494,11 @@ export function DashboardOverview() {
           <CardHeader className="pb-2 pt-4 px-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-medium flex items-center gap-2">
-                <Award className="h-4 w-4 text-indigo-500" />
+                <Award className="size-4 text-indigo-500" />
                 Sponsored Profiles
               </CardTitle>
-              <div className="h-8 w-8 bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center rounded-full">
-                <Award className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <div className="size-8 bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center rounded-full">
+                <Award className="size-4 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
             <CardDescription className="text-xs">
@@ -553,11 +554,11 @@ export function DashboardOverview() {
           <CardHeader className="pb-2 pt-4 px-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-medium flex items-center gap-2">
-                <Star className="h-4 w-4 text-amber-500" />
+                <Star className="size-4 text-amber-500" />
                 Featured Events
               </CardTitle>
-              <div className="h-8 w-8 bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center rounded-full">
-                <Star className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="size-8 bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center rounded-full">
+                <Star className="size-4 text-amber-600 dark:text-amber-400" />
               </div>
             </div>
             <CardDescription className="text-xs">

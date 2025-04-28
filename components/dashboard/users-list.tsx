@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,23 +12,27 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { 
-  Edit, 
-  MoreHorizontal, 
-  Trash,
-  Search,
-  User,
+import {
+  Calendar,
   ChevronLeft,
   ChevronRight,
-  Calendar,
-  MapPin,
+  CircleEllipsis,
+  Edit, 
   Mail,
+  MapPin,
+  MoreHorizontal, 
+  Search,
   Shield,
-  CircleEllipsis
+  Trash,
+  User
 } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-import { ProfileType } from '@/types/profile';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
@@ -40,7 +42,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -49,11 +59,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@/lib/supabase/client';
+import { ProfileType } from '@/types/profile';
 
 export function UsersList() {
   const [users, setUsers] = useState<ProfileType[]>([]);
@@ -93,7 +102,7 @@ export function UsersList() {
     };
 
     fetchUsers();
-  }, [toast]);
+  }, [toast, supabase]);
 
   // Format date nicely
   const formatDate = (dateString?: string) => {
@@ -151,22 +160,24 @@ export function UsersList() {
             className="flex items-center gap-3 cursor-pointer py-1.5 max-w-md"
             onClick={() => router.push(`/dashboard/users/${user.id}/view`)}
           >
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
               {user.avatar ? (
-                <img
+                <Image
                   src={user.avatar}
-                  alt={`${user.name}'s avatar`}
-                  className="w-9 h-9 rounded-full object-cover"
+                  alt={`${user.name ?? 'User'}'s avatar`}
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-9 h-9 bg-muted rounded-full flex items-center justify-center">
-                  <User className="h-5 w-5 text-muted-foreground/60" />
+                <div className="size-9 bg-muted rounded-full flex items-center justify-center">
+                  <User className="size-5 text-muted-foreground/60" />
                 </div>
               )}
               {(user as any).is_admin && (
                 <div className="absolute -bottom-1 -right-1">
-                  <Badge variant="destructive" className="h-4 w-4 p-0 flex items-center justify-center rounded-full">
-                    <Shield className="h-2.5 w-2.5" />
+                  <Badge variant="destructive" className="size-4 p-0 flex items-center justify-center rounded-full">
+                    <Shield className="size-2.5" />
                   </Badge>
                 </div>
               )}
@@ -185,7 +196,7 @@ export function UsersList() {
       accessorKey: 'email',
       header: () => (
         <div className="flex items-center gap-2">
-          <Mail className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <Mail className="size-3.5 text-muted-foreground/70" />
           <span>Email</span>
         </div>
       ),
@@ -199,7 +210,7 @@ export function UsersList() {
       accessorKey: 'location',
       header: () => (
         <div className="flex items-center gap-2">
-          <MapPin className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <MapPin className="size-3.5 text-muted-foreground/70" />
           <span>Location</span>
         </div>
       ),
@@ -213,7 +224,7 @@ export function UsersList() {
       accessorKey: 'join_date',
       header: () => (
         <div className="flex items-center gap-2">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <Calendar className="size-3.5 text-muted-foreground/70" />
           <span>Joined</span>
         </div>
       ),
@@ -275,9 +286,9 @@ export function UsersList() {
           <TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="size-8">
                   <span className="sr-only">Open menu</span>
-                  <CircleEllipsis className="h-4 w-4" />
+                  <CircleEllipsis className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -286,14 +297,14 @@ export function UsersList() {
                   onClick={() => router.push(`/dashboard/users/${user.id}/view`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <User className="h-4 w-4" />
+                  <User className="size-4" />
                   View Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => router.push(`/dashboard/users/${user.id}/edit`)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="size-4" />
                   Edit User
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -310,7 +321,7 @@ export function UsersList() {
                       onClick={handleDelete}
                       className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash className="size-4" />
                       Delete User
                     </DropdownMenuItem>
                   </TooltipTrigger>
@@ -351,7 +362,7 @@ export function UsersList() {
         <CardContent className="flex items-center justify-center p-10">
           <div className="text-center space-y-3">
             <div className="flex justify-center">
-              <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+              <div className="animate-spin size-8 border-2 border-primary border-t-transparent rounded-full" />
             </div>
             <p className="text-muted-foreground">Loading users...</p>
           </div>
@@ -364,7 +375,7 @@ export function UsersList() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
             placeholder="Search users..."
             value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
@@ -383,7 +394,7 @@ export function UsersList() {
             disabled={!table.getCanPreviousPage()}
             className="hidden sm:flex"
           >
-            <ChevronLeft className="mr-1 h-4 w-4" />
+            <ChevronLeft className="mr-1 size-4" />
             Previous
           </Button>
           <Button
@@ -394,7 +405,7 @@ export function UsersList() {
             className="hidden sm:flex"
           >
             Next
-            <ChevronRight className="ml-1 h-4 w-4" />
+            <ChevronRight className="ml-1 size-4" />
           </Button>
           
           {/* Mobile pagination */}
@@ -405,7 +416,7 @@ export function UsersList() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="size-4" />
             </Button>
             <Button
               variant="outline"
@@ -413,7 +424,7 @@ export function UsersList() {
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             </Button>
           </div>
         </div>

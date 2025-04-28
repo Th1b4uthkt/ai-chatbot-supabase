@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -18,8 +18,8 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { createClient } from '@/lib/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { createClient } from '@/lib/supabase/client';
 
 export function DashboardSidebar() {
   const router = useRouter();
@@ -90,8 +90,8 @@ export function DashboardSidebar() {
       <SidebarHeader className="border-b border-border/40">
         <div className="flex h-16 items-center gap-2 px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Anchor className="h-5 w-5" />
+            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Anchor className="size-5" />
             </div>
             <span className="text-lg font-semibold tracking-tight">Phangan Pirate</span>
           </Link>
@@ -114,7 +114,7 @@ export function DashboardSidebar() {
                     >
                       <Link href={item.href} className="flex items-center gap-3">
                         <span className={`${item.color} transition-all`}>
-                          <item.icon className="h-5 w-5" />
+                          <item.icon className="size-5" />
                         </span>
                         <span className="font-medium">{item.title}</span>
                         {/* Active indicator bar */}
@@ -133,8 +133,8 @@ export function DashboardSidebar() {
       <SidebarFooter className="border-t border-border/40 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-              <User className="h-5 w-5 text-muted-foreground" />
+            <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+              <User className="size-5 text-muted-foreground" />
             </div>
             <div className="space-y-0.5">
               <p className="text-sm font-medium">Admin User</p>
@@ -148,7 +148,7 @@ export function DashboardSidebar() {
                   onClick={handleSignOut} 
                   className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogOut className="size-5" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top">

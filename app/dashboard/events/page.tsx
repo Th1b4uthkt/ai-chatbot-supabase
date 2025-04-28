@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 
-import { createClient } from '@/lib/supabase/server';
 import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { EventsList } from '@/components/dashboard/events-list';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EventsPage() {
   const supabase = await createClient();
